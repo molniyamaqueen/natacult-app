@@ -1,1 +1,89 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NATACULT TERMINAL</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            background-color: #0a0a0a;
+            color: #d4af37; /* Золотой цвет NATACULT */
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            border: 2px solid #d4af37;
+            box-sizing: border-box;
+        }
+        .header {
+            font-size: 24px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+        }
+        .status-box {
+            border: 1px solid #d4af37;
+            padding: 20px;
+            width: 80%;
+            background: rgba(212, 175, 55, 0.05);
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 1);
+        }
+        .line {
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        .blink {
+            animation: blinker 1s linear infinite;
+        }
+        @keyframes blinker {
+            50% { opacity: 0; }
+        }
+        button {
+            margin-top: 30px;
+            background: transparent;
+            border: 1px solid #d4af37;
+            color: #d4af37;
+            padding: 10px 20px;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: 0.3s;
+        }
+        button:hover {
+            background: #d4af37;
+            color: black;
+        }
+    </style>
+</head>
+<body>
 
+    <div class="header">🔱 NATACULT PRIVATE 🔱</div>
+    
+    <div class="status-box">
+        <div class="line">> ACCESS GRANTED: USER_ID_VERIFIED</div>
+        <div class="line">> SYSTEM: ONLINE</div>
+        <div class="line">> NETWORK: SECURE_ENCRYPTED</div>
+        <div class="line">> DATA FEED: LOADING... <span class="blink">_</span></div>
+    </div>
+
+    <button onclick="Telegram.WebApp.close()">CLOSE TERMINAL</button>
+
+    <script>
+        // Инициализация Telegram WebApp
+        let tg = window.Telegram.WebApp;
+        tg.expand(); // Разворачиваем на весь экран
+        
+        // Цвет кнопки внутри Telegram
+        tg.MainButton.setText("BACK TO BOT").show();
+        tg.MainButton.onClick(() => {
+            tg.close();
+        });
+    </script>
+</body>
+</html>
