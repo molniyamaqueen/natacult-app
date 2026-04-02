@@ -26,21 +26,77 @@
     <button onclick="location.reload()">REFRESH DATA</button>
 
     <script>
-        let tg = window.Telegram.WebApp;
-        tg.expand();
+        <script>
+    let tg = window.Telegram.WebApp;
+    tg.expand(); // Разворачиваем на весь экран
 
-        async function fetchPrices() {
-            try {
-                const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd');
-                const data = await response.json();
-                document.getElementById('btc-price').innerText = '$' + data.bitcoin.usd.toLocaleString();
-                document.getElementById('eth-price').innerText = '$' + data.ethereum.usd.toLocaleString();
-            } catch (e) {
-                document.getElementById('btc-price').innerText = 'ERROR';
+    // Текст для бегущей строки сканера
+    const scanLogs = [
+        "[LOG]: Connecting to Steam Community Market...",
+        "[LOG]: Analyzing 24h volume for M4A1-S...",
+        "[LOG]: Pattern anomaly detected: Case Hardened #661",
+        "[LOG]: Comparing prices: Skinport vs Steam...",
+        "[LOG]: Buff163 liquidity check: OK",
+        "[LOG]: Deep scan complete. Found 3 high-profit signals."
+    ];
+
+    let logIndex = 0;
+    const scannerText = document.getElementById('scanner-text');
+
+    // Анимация логов сканера
+    setInterval(() => {
+        scannerText.innerText = scanLogs[logIndex];
+        logIndex = (logIndex + 1) % scanLogs.length;
+    }, 2000);
+
+    // Функция отрисовки предиктов
+    function renderPredictions() {
+        const container = document.getElementById('predictions-container');
+        container.innerHTML = ''; // Очистка перед загрузкой
+
+        // Данные предиктов (Сюда мы будем выводить аналитику)
+        const signals = [
+            {
+                name: "M4A1-S | Printstream (FT)",
+                change: "+12.4%",
+                prob: "84",
+                time: "2-4 days",
+                reason: "Supply drop on Steam Market. High demand for low-float crafts."
+            },
+            {
+                name: "Recoil Case",
+                change: "+25.0%",
+                prob: "91",
+                time: "1-2 weeks",
+                reason: "Drop rate reduction confirmed. Daily volume +400% on Buff."
+            },
+            {
+                name: "Butterfly Knife | Tiger Tooth (FN)",
+                change: "+5.2%",
+                prob: "68",
+                time: "24 hours",
+                reason: "Undervalued anomaly. Price floor rising on 3rd party markets."
             }
-        }
-        fetchPrices();
-        setInterval(fetchPrices, 30000); // Обновлять каждые 30 сек
+        ];
+
+        signals.forEach(sig => {
+            const html = `
+                <div class="prediction-item">
+                    <div class="skin-name">${sig.name}</div>
+                    <div class="probability">${sig.prob}%</div>
+                    <div class="trend up">📈 ${sig.change}</div>
+                    <div class="reason"><b>ANALYSIS:</b> ${sig.reason}</div>
+                    <div style="font-size: 10px; color: #d4af37; margin-top: 5px;">TIMEFLOW: ${sig.time}</div>
+                </div>
+            `;
+            container.innerHTML += html;
+        });
+    }
+
+    // Запуск рендера через 1.5 секунды (эффект загрузки)
+    setTimeout(renderPredictions, 1500);
+
+</script>
     </script>
 </body>
 </html>
