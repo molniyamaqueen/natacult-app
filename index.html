@@ -3,159 +3,171 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NATACULT CS2 PRO</title>
+    <title>NATACULT PREMUIUM</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root { --blue: #00d2ff; --dark: #001a33; --ice: #f0faff; --white: #ffffff; --green: #00ffcc; }
+        :root { --blue: #00d2ff; --dark: #000814; --glass: rgba(255, 255, 255, 0.07); --accent: #00ffcc; }
+        
         body { 
-            background: radial-gradient(circle at top, #002b5b 0%, #000 100%); 
-            color: var(--white); font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; 
+            background: radial-gradient(circle at top right, #001d3d 0%, var(--dark) 100%); 
+            color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; overflow-x: hidden;
         }
-        .header { background: rgba(0, 210, 255, 0.1); border-bottom: 1px solid var(--blue); padding: 20px; text-align: center; backdrop-filter: blur(10px); }
-        .container { padding: 15px; }
 
-        /* Категории */
-        .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        /* Анимация появления */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header { 
+            padding: 25px; text-align: center; border-bottom: 1px solid rgba(0, 210, 255, 0.2);
+            backdrop-filter: blur(10px); background: rgba(0, 8, 20, 0.5); position: sticky; top: 0; z-index: 100;
+        }
+
+        .live-scanner {
+            background: rgba(0, 255, 204, 0.05); border: 1px solid rgba(0, 255, 204, 0.2);
+            margin: 15px; padding: 10px; border-radius: 8px; font-family: 'Courier New', monospace;
+            font-size: 11px; color: var(--accent); box-shadow: inset 0 0 10px rgba(0, 255, 204, 0.1);
+        }
+
+        .tabs { display: flex; gap: 8px; padding: 0 15px; margin-bottom: 20px; }
         .tab { 
-            flex: 1; background: rgba(0, 210, 255, 0.05); border: 1px solid var(--blue); 
-            color: var(--blue); padding: 10px; border-radius: 8px; font-size: 11px; 
-            text-align: center; font-weight: bold; transition: 0.3s;
+            flex: 1; padding: 12px; background: var(--glass); border: 1px solid rgba(0, 210, 255, 0.2);
+            border-radius: 12px; color: var(--blue); font-size: 10px; font-weight: 800; text-align: center; transition: 0.3s;
         }
-        .tab.active { background: var(--blue); color: #000; box-shadow: 0 0 15px var(--blue); }
+        .tab.active { background: var(--blue); color: #000; box-shadow: 0 0 25px rgba(0, 210, 255, 0.5); border-color: var(--blue); }
 
-        /* Карточка предмета */
         .asset-card { 
-            background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(0, 210, 255, 0.2);
-            border-radius: 15px; padding: 15px; margin-bottom: 20px; position: relative;
+            background: var(--glass); border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px); border-radius: 20px; padding: 20px; margin: 0 15px 15px 15px;
+            animation: fadeInUp 0.5s ease forwards; opacity: 0; /* Для анимации */
         }
-        .hot-badge { position: absolute; top: -10px; right: 15px; background: #ff4b2b; color: #fff; padding: 2px 8px; border-radius: 5px; font-size: 10px; font-weight: bold; }
-        
-        .price-info { display: flex; justify-content: space-between; align-items: flex-end; }
-        .price { font-size: 20px; font-weight: 800; color: var(--blue); }
-        .percent { color: var(--green); font-size: 12px; }
 
-        .ai-box { background: rgba(0, 210, 255, 0.1); border-radius: 10px; padding: 12px; margin-top: 15px; font-size: 12px; line-height: 1.4; border-left: 3px solid var(--blue); }
+        .hot-tag { background: linear-gradient(90deg, #ff4b2b, #ff416c); color: #fff; padding: 3px 10px; border-radius: 6px; font-size: 10px; position: absolute; top: -10px; right: 20px; }
+
+        .price { font-size: 24px; font-weight: 900; color: var(--blue); text-shadow: 0 0 10px rgba(0, 210, 255, 0.3); }
         
-        /* Калькулятор */
-        .calc-box { background: #000; border: 1px solid var(--blue); padding: 20px; border-radius: 15px; margin-top: 20px; }
-        input { width: 100%; padding: 12px; background: #111; border: 1px solid #333; color: #fff; border-radius: 8px; margin: 8px 0; box-sizing: border-box; }
-        
-        .disclaimer { font-size: 10px; color: #668ba4; text-align: justify; margin-top: 30px; line-height: 1.6; padding: 10px; border-top: 1px solid rgba(0, 212, 255, 0.2); }
+        .ai-consultant { 
+            background: linear-gradient(135deg, rgba(0, 210, 255, 0.1), rgba(0, 255, 204, 0.05));
+            border-radius: 15px; padding: 15px; border-left: 4px solid var(--accent); margin-top: 15px;
+        }
+
+        .calc-box { 
+            background: rgba(0, 0, 0, 0.4); border: 1px solid var(--blue); border-radius: 20px;
+            padding: 20px; margin: 20px 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        input { 
+            width: 100%; padding: 15px; background: rgba(255,255,255,0.05); border: 1px solid rgba(0, 210, 255, 0.3);
+            color: #fff; border-radius: 12px; margin: 10px 0; box-sizing: border-box; outline: none;
+        }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <div style="font-size: 18px; font-weight: 900; letter-spacing: 2px;">NATACULT CS2 PRO</div>
-    <div style="font-size: 10px; opacity: 0.7; margin-top: 5px;">MARKET INTELLIGENCE // ICE EDITION</div>
+    <div style="font-size: 22px; font-weight: 900; letter-spacing: 3px;">NATACULT <span style="color:var(--blue)">PRO</span></div>
+    <div style="font-size: 9px; opacity: 0.6; margin-top: 5px;">PREMIUM MARKET INTELLIGENCE // V3.0</div>
 </div>
 
-<div class="container">
-    <div class="tabs">
-        <div class="tab active" onclick="loadCat('low', this)">LOW PRICE</div>
-        <div class="tab" onclick="loadCat('med', this)">MEDIUM</div>
-        <div class="tab" onclick="loadCat('high', this)">HIGH END</div>
-    </div>
+<div class="live-scanner" id="scanner-text">> Initializing Ice Scan...</div>
 
-    <div id="market-list"></div>
+<div class="tabs">
+    <div class="tab active" onclick="loadCat('low', this)">LOW</div>
+    <div class="tab" onclick="loadCat('med', this)">MEDIUM</div>
+    <div class="tab" onclick="loadCat('high', this)">HIGH END</div>
+</div>
 
-    <div class="calc-box">
-        <div style="font-size: 12px; color: var(--blue); font-weight: bold; margin-bottom: 10px;">📊 PROFIT & ROI CALCULATOR (-13%)</div>
-        <input type="number" id="buyPrice" placeholder="Цена покупки ($)">
-        <input type="number" id="sellPrice" placeholder="Цена продажи ($)">
-        <div id="roiResult" style="margin-top: 10px; font-weight: bold; color: var(--green);">ЧИСТЫЙ ПРОФИТ: $0.00 (ROI: 0%)</div>
-    </div>
+<div id="content-list"></div>
 
-    <div class="disclaimer">
-        <b>NFA NOTICE:</b> Данная платформа предназначена исключительно для информационных целей. Все инвестиционные решения пользователь принимает самостоятельно. Рынок является высоковолатильным, и прошлые результаты не гарантируют будущую доходность.
-    </div>
+<div class="calc-box">
+    <div style="font-size: 12px; color: var(--blue); font-weight: bold; margin-bottom: 10px;">📊 QUICK PROFIT & ROI (-13%)</div>
+    <input type="number" id="buyP" placeholder="Цена покупки ($)">
+    <input type="number" id="sellP" placeholder="Цена продажи ($)">
+    <div id="roiRes" style="margin-top: 10px; font-weight: bold; color: var(--accent); font-size: 16px;">READY TO CALCULATE</div>
+</div>
+
+<div style="padding: 20px; font-size: 10px; color: rgba(255,255,255,0.3); text-align: center; line-height: 1.6;">
+    <b>LEGAL:</b> Не является фин. рекомендацией. Прошлые результаты не гарантируют доход в будущем. Все права защищены © NATACULT 2024.
 </div>
 
 <script>
     const tg = window.Telegram.WebApp;
     tg.expand();
+    tg.setHeaderColor('#000814');
+
+    // Живой логгер
+    const logs = [
+        "Analyzing Steam Market liquidity...", "M4A1-S Printstream: Bullish trend",
+        "Volume spike: Recoil Case (+14%)", "Scanning Buff163 patterns...",
+        "AI: Accumulation phase detected", "Whale activity: Butterfly | Fade"
+    ];
+    setInterval(() => {
+        document.getElementById('scanner-text').innerText = "> " + logs[Math.floor(Math.random()*logs.length)];
+    }, 3500);
 
     const db = {
-        low: [
-            { name: "Recoil Case", price: "$1.45", grow: "+182%", signal: "STRONG BUY", ai: "Наблюдается критическое снижение предложения на Steam Market. Потенциал роста: высокий.", hist: [10, 25, 40, 90, 140, 182] },
-            { name: "Fracture Case", price: "$0.85", grow: "+45%", signal: "HOLD", ai: "Стабильный объем торгов. Актив в зоне накопления.", hist: [5, 12, 18, 25, 38, 45] }
-        ],
-        med: [
-            { name: "AK-47 | Slate (FN)", price: "$12.80", grow: "+64%", signal: "BUY", ai: "Популярный скин для крафтов. Ликвидность высокая.", hist: [8, 15, 30, 45, 55, 64] }
-        ],
-        high: [
-            { name: "Butterfly | Doppler (FN)", price: "$1840", grow: "+210%", signal: "RISKY", ai: "Достигнут исторический максимум. Возможна коррекция цены.", hist: [20, 60, 110, 150, 190, 210] }
-        ]
+        low: [{ name: "Recoil Case", price: "$1.45", grow: "+182%", ai: "Критическое снижение предложения. Потенциал: Высокий.", hist: [10, 40, 80, 120, 160, 182] }],
+        med: [{ name: "AK-47 | Slate (FN)", price: "$12.80", grow: "+64%", ai: "Зона накопления. Ожидается импульс в ближайшие 48ч.", hist: [5, 15, 25, 45, 55, 64] }],
+        high: [{ name: "Butterfly | Doppler", price: "$1840", grow: "+210%", ai: "Исторический хай. Риск коррекции 15-20%.", hist: [10, 70, 120, 180, 200, 210] }]
     };
-
-    let charts = [];
 
     function loadCat(cat, el) {
         if(el) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             el.classList.add('active');
         }
-        
-        const list = document.getElementById('market-list');
+        const list = document.getElementById('content-list');
         list.innerHTML = '';
-        charts.forEach(c => c.destroy());
-        charts = [];
-
+        
         db[cat].forEach((item, i) => {
-            const canvasId = `chart-${cat}-${i}`;
+            const canvasId = `c-${cat}-${i}`;
             list.innerHTML += `
-                <div class="asset-card">
-                    <div class="hot-badge">HOT 🔥</div>
-                    <div style="font-weight: bold; font-size: 16px;">${item.name}</div>
-                    <div class="price-info">
+                <div class="asset-card" style="animation-delay: ${i*0.1}s">
+                    <div class="hot-tag">HOT SIGNAL 🔥</div>
+                    <div style="font-weight: bold; font-size: 14px; opacity: 0.8;">${item.name}</div>
+                    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin: 10px 0;">
                         <div class="price">${item.price}</div>
-                        <div class="percent">All-time: ${item.grow}</div>
+                        <div style="color: var(--accent); font-size: 12px; font-weight: bold;">${item.grow} Growth</div>
                     </div>
-                    <canvas id="${canvasId}" style="max-height: 120px; margin-top: 10px;"></canvas>
-                    <div class="ai-box"><b>🧠 AI:</b> ${item.ai}</div>
-                    <div style="margin-top: 10px; font-size: 11px; color: var(--blue); font-weight: bold;">SIGNAL: ${item.signal}</div>
+                    <canvas id="${canvasId}" style="max-height: 100px;"></canvas>
+                    <div class="ai-consultant">
+                        <div style="font-size: 10px; color: var(--accent); font-weight: bold; margin-bottom: 5px;">🧠 AI CONSULTANT</div>
+                        <div style="font-size: 12px; line-height: 1.4;">${item.ai}</div>
+                    </div>
                 </div>
             `;
-            setTimeout(() => createChart(canvasId, item.hist), 50);
+            setTimeout(() => renderChart(canvasId, item.hist), 50);
         });
     }
 
-    function createChart(id, data) {
+    function renderChart(id, data) {
         const ctx = document.getElementById(id).getContext('2d');
-        const c = new Chart(ctx, {
+        new Chart(ctx, {
             type: 'line',
             data: {
-                labels: ['Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Now'],
+                labels: [1,2,3,4,5,6],
                 datasets: [{
-                    data: data,
-                    borderColor: '#00d2ff',
-                    borderWidth: 2,
-                    tension: 0.4,
-                    pointRadius: 0,
-                    fill: true,
-                    backgroundColor: 'rgba(0, 210, 255, 0.05)'
+                    data: data, borderColor: '#00d2ff', borderWidth: 3, tension: 0.4,
+                    pointRadius: 0, fill: true, backgroundColor: 'rgba(0, 210, 255, 0.1)'
                 }]
             },
             options: { plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } }
         });
-        charts.push(c);
     }
 
-    // Калькулятор ROI
-    const calc = () => {
-        const buy = parseFloat(document.getElementById('buyPrice').value) || 0;
-        const sell = parseFloat(document.getElementById('sellPrice').value) || 0;
-        const netSell = sell * 0.87;
-        const profit = netSell - buy;
-        const roi = buy > 0 ? (profit / buy * 100).toFixed(1) : 0;
-        
-        document.getElementById('roiResult').innerText = `ЧИСТЫЙ ПРОФИТ: $${profit.toFixed(2)} (ROI: ${roi}%)`;
-        document.getElementById('roiResult').style.color = profit >= 0 ? '#00ffcc' : '#ff3b30';
-    };
+    function calc() {
+        const b = parseFloat(document.getElementById('buyP').value) || 0;
+        const s = parseFloat(document.getElementById('sellP').value) || 0;
+        const net = s * 0.87;
+        const prof = net - b;
+        const roi = b > 0 ? (prof/b*100).toFixed(1) : 0;
+        document.getElementById('roiRes').innerText = `PROFIT: $${prof.toFixed(2)} | ROI: ${roi}%`;
+        document.getElementById('roiRes').style.color = prof >= 0 ? 'var(--accent)' : '#ff4b2b';
+    }
 
-    document.getElementById('buyPrice').addEventListener('input', calc);
-    document.getElementById('sellPrice').addEventListener('input', calc);
+    document.getElementById('buyP').addEventListener('input', calc);
+    document.getElementById('sellP').addEventListener('input', calc);
 
     loadCat('low');
 </script>
