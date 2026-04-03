@@ -3,86 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NATACULT MARKET SCANNER</title>
+    <title>NATACULT ICE TERMINAL</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { background: #050505; color: #d4af37; font-family: 'Courier New', monospace; margin: 0; padding: 10px; border: 1px solid #d4af37; box-sizing: border-box; min-height: 100vh; }
-        .header { text-align: center; border-bottom: 2px solid #d4af37; padding: 10px 0; margin-bottom: 15px; background: rgba(212, 175, 55, 0.05); }
-        .scan-line { font-size: 10px; color: #00ff00; margin-bottom: 10px; height: 15px; overflow: hidden; opacity: 0.7; }
+        :root { --main-blue: #00d2ff; --dark-blue: #002b5b; --white: #ffffff; }
+        body { 
+            background: radial-gradient(circle at top, #001f3f, #000); 
+            color: var(--white); font-family: 'Segoe UI', sans-serif; 
+            margin: 0; padding: 15px; min-height: 100vh;
+            background-image: url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
+        }
+        .header { text-align: center; border-bottom: 2px solid var(--main-blue); padding-bottom: 10px; margin-bottom: 20px; text-shadow: 0 0 10px var(--main-blue); }
         
-        .prediction-item { border-left: 3px solid #d4af37; background: #111; margin-bottom: 12px; padding: 10px; position: relative; }
-        .skin-name { color: #fff; font-size: 14px; font-weight: bold; }
-        .trend { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 12px; margin-top: 5px; font-weight: bold; }
-        .up { background: rgba(0, 255, 0, 0.2); color: #00ff00; }
-        .reason { font-size: 11px; color: #ccc; margin-top: 8px; line-height: 1.3; }
-        .probability { position: absolute; top: 10px; right: 10px; font-size: 12px; color: #d4af37; border: 1px solid #d4af37; padding: 2px 4px; }
-        
-        /* Стили для калькулятора */
-        .calc-card { border: 1px solid #888; background: #111; margin-bottom: 12px; padding: 10px; border-radius: 4px; }
-        input { width: 90%; background: #000; border: 1px solid #d4af37; color: #fff; margin-top: 10px; padding: 8px; font-family: inherit; }
-        #result-calc { font-size: 13px; margin-top: 10px; color: #00ff00; font-weight: bold; }
+        /* Секции цен */
+        .tabs { display: flex; justify-content: space-between; margin-bottom: 15px; }
+        .tab { 
+            background: rgba(0, 210, 255, 0.1); border: 1px solid var(--main-blue); 
+            padding: 8px 12px; font-size: 11px; cursor: pointer; flex: 1; text-align: center; margin: 0 3px;
+        }
+        .tab.active { background: var(--main-blue); color: #000; font-weight: bold; }
 
-        .exit-btn { width: 100%; background: transparent; border: 1px solid #d4af37; color: #d4af37; padding: 10px; cursor: pointer; margin-top: 20px; font-weight: bold; }
+        .card { 
+            background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(0, 210, 255, 0.3);
+            border-radius: 8px; padding: 15px; margin-bottom: 15px; position: relative;
+            backdrop-filter: blur(5px);
+        }
+        .hot-tag { position: absolute; top: -10px; right: 10px; background: #ff4b2b; color: #fff; padding: 2px 8px; font-size: 10px; border-radius: 4px; }
+        
+        canvas { margin-top: 10px; max-height: 150px; }
+
+        .calc-input { width: 100%; background: #000; border: 1px solid var(--main-blue); color: var(--white); padding: 10px; box-sizing: border-box; border-radius: 4px; }
+        
+        .footer-disclaimer { font-size: 9px; color: rgba(255,255,255,0.4); text-align: center; margin-top: 20px; line-height: 1.4; padding: 10px; border: 1px solid rgba(255,255,255,0.1); }
     </style>
 </head>
 <body>
 
-<div class="header">
-    <div style="font-size: 16px; letter-spacing: 2px;">🔱 NATACULT SCANNER </div>
-    <div style="font-size: 9px; opacity: 0.6;">DEEP ANALYTICS // CALC_V1.0</div>
+<div class="header">🔱 NATACULT ICE ANALYTICS 🔱</div>
+
+<div class="tabs">
+    <div class="tab active" onclick="showSection('low')">LOW PRICE</div>
+    <div class="tab" onclick="showSection('med')">MEDIUM</div>
+    <div class="tab" onclick="showSection('high')">HIGH END</div>
 </div>
 
-<div class="scan-line" id="scanner-text">Initializing deep market scan...</div>
-
-<div id="predictions-container">
+<div id="content-area">
     </div>
 
-<div class="calc-card">
-    <div class="skin-name" style="color: #d4af37;">🧮 STEAM PROFIT CALCULATOR</div>
-    <div style="font-size: 10px; color: #aaa;">Введи цену продажи, чтобы узнать чистый доход (-13%):</div>
-    <input type="number" id="buy-price" placeholder="Цена в $">
-    <div id="result-calc">ЧИСТЫЙ ВЫХОД: $0.00</div>
+<div class="card">
+    <div style="color: var(--main-blue); font-weight: bold; margin-bottom: 10px;">🧮 PROFIT CALCULATOR</div>
+    <input type="number" id="calc-in" class="calc-input" placeholder="Введите цену продажи ($)">
+    <div id="calc-out" style="margin-top: 10px; color: #00ff00; font-size: 14px;">ЧИСТАЯ ПРИБЫЛЬ: $0.00</div>
 </div>
 
-<button class="exit-btn" onclick="Telegram.WebApp.close()">EXIT TERMINAL</button>
+<div class="footer-disclaimer">
+    <b>LEGAL NOTICE:</b> Данный программный продукт является аналитическим инструментом и не предоставляет индивидуальных финансовых рекомендаций. Торговля внутриигровыми предметами сопряжена с высокими рисками. NATACULT не несет ответственности за ваши торговые решения.
+</div>
 
 <script>
     let tg = window.Telegram.WebApp;
     tg.expand();
+    tg.setHeaderColor('#001f3f');
 
-    // Логи сканера
-    const scanLogs = ["[LOG]: Scanning Buff...", "[LOG]: Steam prices OK", "[LOG]: Comparing floats...", "[LOG]: Found 3 anomalies."];
-    let logI = 0;
-    setInterval(() => {
-        document.getElementById('scanner-text').innerText = scanLogs[logI];
-        logI = (logI + 1) % scanLogs.length;
-    }, 2500);
+    const data = {
+        low: [ { name: "Recoil Case", profit: "+28%", history: [1, 1.2, 1.1, 1.5, 1.4, 1.8] } ],
+        med: [ { name: "AK-47 | Slate (FN)", profit: "+15%", history: [8, 9, 8.5, 10, 9.8, 11] } ],
+        high: [ { name: "M4A1-S | Hot Rod", profit: "+12%", history: [900, 950, 920, 980, 1050, 1080] } ]
+    };
 
-    // Отрисовка сигналов
-    function render() {
-        const container = document.getElementById('predictions-container');
-        const signals = [
-            { name: "M4A1-S | Printstream (FT)", change: "+12.4%", prob: "84", reason: "Supply drop on Steam Market." },
-            { name: "Butterfly | Tiger Tooth (FN)", change: "+5.2%", prob: "68", reason: "Undervalued anomaly detected." }
-        ];
-        signals.forEach(sig => {
-            container.innerHTML += `
-                <div class="prediction-item">
-                    <div class="skin-name">${sig.name}</div>
-                    <div class="probability">${sig.prob}%</div>
-                    <div class="trend up">📈 ${sig.change}</div>
-                    <div class="reason"><b>ANALYSIS:</b> ${sig.reason}</div>
-                </div>`;
+    function showSection(type) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        event.target.classList.add('active');
+        
+        const area = document.getElementById('content-area');
+        area.innerHTML = '';
+        
+        data[type].forEach((item, index) => {
+            const id = `chart-${type}-${index}`;
+            area.innerHTML += `
+                <div class="card">
+                    <span class="hot-tag">HOT 🔥</span>
+                    <div style="font-weight: bold;">${item.name}</div>
+                    <div style="color: #00ff00; font-size: 18px; margin: 5px 0;">${item.profit} EXPECTED</div>
+                    <canvas id="${id}"></canvas>
+                </div>
+            `;
+            setTimeout(() => renderChart(id, item.history), 100);
         });
     }
-    render();
 
-    // Логика калькулятора
-    document.getElementById('buy-price').addEventListener('input', function(e) {
-        let val = e.target.value;
-        let clear = val * 0.87; 
-        document.getElementById('result-calc').innerText = "ЧИСТЫЙ ВЫХОД: $" + clear.toFixed(2);
+    function renderChart(id, points) {
+        const ctx = document.getElementById(id).getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['', '', '', '', '', ''],
+                datasets: [{
+                    data: points,
+                    borderColor: '#00d2ff',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    pointRadius: 0
+                }]
+            },
+            options: { plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } }
+        });
+    }
+
+    document.getElementById('calc-in').addEventListener('input', (e) => {
+        document.getElementById('calc-out').innerText = "ЧИСТАЯ ПРИБЫЛЬ: $" + (e.target.value * 0.87).toFixed(2);
     });
+
+    showSection('low');
 </script>
 </body>
 </html>
