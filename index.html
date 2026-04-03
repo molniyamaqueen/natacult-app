@@ -3,93 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NATACULT PREMIUM V3.0</title>
+    <title>NATACULT OS V4.0</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root { --blue: #00d2ff; --dark: #000814; --glass: rgba(255, 255, 255, 0.07); --accent: #00ffcc; }
+        :root { --blue: #00d2ff; --dark: #000814; --glass: rgba(255, 255, 255, 0.07); --accent: #00ffcc; --gold: #ffd700; }
+        body { background: radial-gradient(circle at top right, #001d3d 0%, var(--dark) 100%); color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
         
-        body { 
-            background: radial-gradient(circle at top right, #001d3d 0%, var(--dark) 100%); 
-            color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; overflow-x: hidden;
-        }
+        .header { padding: 20px; text-align: center; border-bottom: 1px solid rgba(0, 210, 255, 0.2); backdrop-filter: blur(10px); sticky; top: 0; z-index: 100; }
+        
+        /* RANK SYSTEM */
+        .rank-card { background: linear-gradient(90deg, rgba(0,210,255,0.1), rgba(255,215,0,0.1)); border: 1px solid var(--gold); margin: 15px; padding: 10px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; }
+        .rank-name { color: var(--gold); font-weight: bold; font-size: 12px; text-transform: uppercase; }
 
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        .update-timer { font-size: 9px; color: var(--accent); text-align: center; margin-bottom: 10px; opacity: 0.8; }
 
-        .header { 
-            padding: 25px; text-align: center; border-bottom: 1px solid rgba(0, 210, 255, 0.2);
-            backdrop-filter: blur(10px); background: rgba(0, 8, 20, 0.5); position: sticky; top: 0; z-index: 100;
-        }
-
-        /* AI БЛОК СРАЗУ ПОСЛЕ ХЕДЕРА */
-        .ai-search-card {
-            border: 1px solid var(--blue); background: rgba(0,210,255,0.05); 
-            margin: 15px; border-radius: 15px; padding: 15px;
-            box-shadow: 0 0 15px rgba(0, 210, 255, 0.1);
-        }
-
-        .live-scanner {
-            background: rgba(0, 255, 204, 0.05); border: 1px solid rgba(0, 255, 204, 0.2);
-            margin: 15px; padding: 10px; border-radius: 8px; font-family: 'Courier New', monospace;
-            font-size: 11px; color: var(--accent);
-        }
-
+        .ai-search-card { border: 1px solid var(--blue); background: rgba(0,210,255,0.05); margin: 15px; border-radius: 15px; padding: 15px; }
         .tabs { display: flex; gap: 8px; padding: 0 15px; margin-bottom: 20px; }
-        .tab { 
-            flex: 1; padding: 12px; background: var(--glass); border: 1px solid rgba(0, 210, 255, 0.2);
-            border-radius: 12px; color: var(--blue); font-size: 10px; font-weight: 800; text-align: center; transition: 0.3s;
-        }
-        .tab.active { background: var(--blue); color: #000; box-shadow: 0 0 25px rgba(0, 210, 255, 0.5); border-color: var(--blue); }
+        .tab { flex: 1; padding: 12px; background: var(--glass); border: 1px solid rgba(0, 210, 255, 0.2); border-radius: 12px; color: var(--blue); font-size: 10px; font-weight: 800; text-align: center; }
+        .tab.active { background: var(--blue); color: #000; box-shadow: 0 0 20px var(--blue); }
 
-        .asset-card { 
-            background: var(--glass); border: 1px solid rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(15px); border-radius: 20px; padding: 20px; margin: 0 15px 15px 15px;
-            animation: fadeInUp 0.5s ease forwards; opacity: 0; position: relative;
-        }
-
-        .hot-tag { background: linear-gradient(90deg, #ff4b2b, #ff416c); color: #fff; padding: 3px 10px; border-radius: 6px; font-size: 10px; position: absolute; top: -10px; right: 20px; }
-
+        .asset-card { background: var(--glass); border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(15px); border-radius: 20px; padding: 20px; margin: 0 15px 15px 15px; position: relative; }
         .price { font-size: 24px; font-weight: 900; color: var(--blue); }
         
-        .ai-consultant { 
-            background: linear-gradient(135deg, rgba(0, 210, 255, 0.1), rgba(0, 255, 204, 0.05));
-            border-radius: 15px; padding: 15px; border-left: 4px solid var(--accent); margin-top: 15px;
-        }
+        .news-ticker { background: rgba(255,255,255,0.03); border: 1px dashed rgba(255,255,255,0.2); margin: 15px; padding: 10px; font-size: 11px; color: #aaa; overflow: hidden; white-space: nowrap; }
 
-        .calc-box { 
-            background: rgba(0, 0, 0, 0.4); border: 1px solid var(--blue); border-radius: 20px;
-            padding: 20px; margin: 20px 15px;
-        }
-
-        input { 
-            width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(0, 210, 255, 0.3);
-            color: #fff; border-radius: 12px; margin: 5px 0; box-sizing: border-box; outline: none;
-        }
-
-        button.ask-btn {
-            background: var(--blue); color: #000; border: none; border-radius: 8px; 
-            padding: 10px 20px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px;
-        }
+        input { width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(0, 210, 255, 0.3); color: #fff; border-radius: 12px; margin: 5px 0; box-sizing: border-box; }
+        button { background: var(--blue); color: #000; border: none; border-radius: 8px; padding: 10px; font-weight: bold; width: 100%; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <div style="font-size: 22px; font-weight: 900; letter-spacing: 3px;">NATACULT <span style="color:var(--blue)">PRO</span></div>
-    <div style="font-size: 9px; opacity: 0.6; margin-top: 5px;">PREMIUM MARKET INTELLIGENCE // V3.0</div>
+    <div style="font-size: 20px; font-weight: 900; letter-spacing: 2px;">NATACULT <span style="color:var(--blue)">OS</span></div>
 </div>
+
+<div class="rank-card">
+    <span>USER RANK: <span class="rank-name" id="user-rank">PLANKTON 🐟</span></span>
+    <span style="font-size: 10px; opacity: 0.7;">VOL: $0.00</span>
+</div>
+
+<div class="update-timer" id="timer-label">NEXT MARKET UPDATE: 29:59</div>
+
+<div class="news-ticker" id="news-line">NEWS: Аналитики ожидают выход новой операции в CS2...</div>
 
 <div class="ai-search-card">
-    <div style="font-size: 10px; color: var(--blue); font-weight: bold; margin-bottom: 10px; letter-spacing: 1px;">🧠 AI PREDICT ENGINE (BETA)</div>
-    <input type="text" id="ai-input" placeholder="Введите название (напр. AK-47 Slate)">
-    <button class="ask-btn" onclick="askAI()">АНАЛИЗИРОВАТЬ АССЕТ</button>
-    <div id="ai-response" style="display: none; margin-top: 15px; font-size: 13px; border-top: 1px solid rgba(0,210,255,0.2); padding-top: 12px; line-height: 1.4;"></div>
+    <div style="font-size: 10px; color: var(--blue); font-weight: bold; margin-bottom: 10px;">🧠 AI PREDICT ENGINE (BETA)</div>
+    <input type="text" id="ai-input" placeholder="Напр: M4A4 Howl">
+    <button onclick="askAI()" style="margin-top:5px;">АНАЛИЗ</button>
+    <div id="ai-response" style="display: none; margin-top: 15px; font-size: 12px; border-top: 1px solid rgba(0,210,255,0.2); padding-top: 10px;"></div>
 </div>
-
-<div class="live-scanner" id="scanner-text">> Initializing Ice Scan...</div>
 
 <div class="tabs">
     <div class="tab active" onclick="loadCat('low', this)">LOW</div>
@@ -99,47 +62,46 @@
 
 <div id="content-list"></div>
 
-<div class="calc-box">
-    <div style="font-size: 12px; color: var(--blue); font-weight: bold; margin-bottom: 10px;">📊 QUICK PROFIT & ROI (-13%)</div>
-    <input type="number" id="buyP" placeholder="Цена покупки ($)">
-    <input type="number" id="sellP" placeholder="Цена продажи ($)">
-    <div id="roiRes" style="margin-top: 10px; font-weight: bold; color: var(--accent); font-size: 14px;">READY TO CALCULATE</div>
-</div>
-
 <script>
     const tg = window.Telegram.WebApp;
     tg.expand();
-    tg.setHeaderColor('#000814');
 
-    // Логика AI Поиска
-    function askAI() {
-        const input = document.getElementById('ai-input').value;
-        const resDiv = document.getElementById('ai-response');
-        if(!input) return;
-        resDiv.style.display = 'block';
-        resDiv.innerHTML = "<span style='color: #00ffcc;'>[АНАЛИЗИРУЮ ТРЕНДЫ BUFF163...]</span>";
-        setTimeout(() => {
-            resDiv.innerHTML = `
-                <div style="color: var(--blue); font-weight: bold;">ВЕРДИКТ ПО ${input.toUpperCase()}:</div>
-                <div style="color: #00ffcc; margin-top: 5px;">📈 СТАТУС: BULLISH (УМЕРЕННЫЙ РОСТ)</div>
-                <div style="font-size: 11px; opacity: 0.8; margin-top: 5px;">Высокая плотность ордеров на покупку. Ожидаемая волатильность: 4.2%. Рекомендуется удержание (HOLD).</div>
-            `;
-        }, 1500);
+    // 1. СИСТЕМА ОБНОВЛЕНИЯ (КАЖДЫЕ 30 МИНУТ)
+    let timeLeft = 1800; // 30 минут в секундах
+    function startTimer() {
+        setInterval(() => {
+            if (timeLeft <= 0) {
+                timeLeft = 1800;
+                refreshMarketData(); // Обновляем цены
+            }
+            timeLeft--;
+            const mins = Math.floor(timeLeft / 60);
+            const secs = timeLeft % 60;
+            document.getElementById('timer-label').innerText = `NEXT MARKET UPDATE: ${mins}:${secs < 10 ? '0'+secs : secs}`;
+        }, 1000);
     }
 
-    // Живой логгер
-    const logs = ["Analyzing Steam Market liquidity...", "Volume spike: Recoil Case (+14%)", "Scanning patterns...", "Whale activity detected"];
-    setInterval(() => {
-        document.getElementById('scanner-text').innerText = "> " + logs[Math.floor(Math.random()*logs.length)];
-    }, 3500);
+    function refreshMarketData() {
+        // Имитация изменения цен на 1-3% каждые 30 минут
+        for (let cat in db) {
+            db[cat].forEach(item => {
+                let change = (Math.random() * 2 - 1).toFixed(2);
+                let currentPrice = parseFloat(item.price.replace('$', ''));
+                item.price = `$${(currentPrice + (currentPrice * (change/100))).toFixed(2)}`;
+            });
+        }
+        loadCat(activeCat); // Перерисовать текущую категорию
+    }
 
+    let activeCat = 'low';
     const db = {
-        low: [{ name: "Recoil Case", price: "$1.45", grow: "+182%", ai: "Критическое снижение предложения. Потенциал: Высокий.", hist: [10, 40, 80, 120, 160, 182] }],
-        med: [{ name: "AK-47 | Slate (FN)", price: "$12.80", grow: "+64%", ai: "Зона накопления. Ожидается импульс.", hist: [5, 15, 25, 45, 55, 64] }],
-        high: [{ name: "Butterfly | Doppler", price: "$1840", grow: "+210%", ai: "Исторический хай. Риск коррекции.", hist: [10, 70, 120, 180, 200, 210] }]
+        low: [{ name: "Recoil Case", price: "$1.45", grow: "+182%", hist: [10, 40, 80, 120, 160, 182] }],
+        med: [{ name: "AK-47 | Slate (FN)", price: "$12.80", grow: "+64%", hist: [5, 15, 25, 45, 55, 64] }],
+        high: [{ name: "Butterfly | Doppler", price: "$1840", grow: "+210%", hist: [10, 70, 120, 180, 200, 210] }]
     };
 
     function loadCat(cat, el) {
+        activeCat = cat;
         if(el) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             el.classList.add('active');
@@ -149,18 +111,10 @@
         db[cat].forEach((item, i) => {
             const canvasId = `c-${cat}-${i}`;
             list.innerHTML += `
-                <div class="asset-card" style="animation-delay: ${i*0.1}s">
-                    <div class="hot-tag">HOT SIGNAL 🔥</div>
-                    <div style="font-weight: bold; font-size: 14px; opacity: 0.8;">${item.name}</div>
-                    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin: 10px 0;">
-                        <div class="price">${item.price}</div>
-                        <div style="color: var(--accent); font-size: 12px; font-weight: bold;">${item.grow}</div>
-                    </div>
-                    <canvas id="${canvasId}" style="max-height: 100px;"></canvas>
-                    <div class="ai-consultant">
-                        <div style="font-size: 10px; color: var(--accent); font-weight: bold;">🧠 AI CONSULTANT</div>
-                        <div style="font-size: 11px; line-height: 1.4; margin-top: 5px;">${item.ai}</div>
-                    </div>
+                <div class="asset-card">
+                    <div style="font-weight: bold; font-size: 14px;">${item.name}</div>
+                    <div class="price">${item.price}</div>
+                    <canvas id="${canvasId}" style="max-height: 100px; margin-top:10px;"></canvas>
                 </div>`;
             setTimeout(() => {
                 const ctx = document.getElementById(canvasId).getContext('2d');
@@ -173,18 +127,14 @@
         });
     }
 
-    function calc() {
-        const b = parseFloat(document.getElementById('buyP').value) || 0;
-        const s = parseFloat(document.getElementById('sellP').value) || 0;
-        const net = s * 0.87;
-        const prof = net - b;
-        const roi = b > 0 ? (prof/b*100).toFixed(1) : 0;
-        document.getElementById('roiRes').innerText = `PROFIT: $${prof.toFixed(2)} | ROI: ${roi}%`;
-        document.getElementById('roiRes').style.color = prof >= 0 ? 'var(--accent)' : '#ff4b2b';
+    function askAI() {
+        const res = document.getElementById('ai-response');
+        res.style.display = 'block';
+        res.innerHTML = "ANALYZING PATTERNS...";
+        setTimeout(() => { res.innerHTML = `<span style="color:var(--accent)">ВЕРДИКТ: BULLISH.</span> Объемы Buff163 подтверждают закуп.`; }, 1200);
     }
 
-    document.getElementById('buyP').addEventListener('input', calc);
-    document.getElementById('sellP').addEventListener('input', calc);
+    startTimer();
     loadCat('low');
 </script>
 </body>
