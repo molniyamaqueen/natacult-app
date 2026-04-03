@@ -7,35 +7,36 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root { --main-blue: #00d2ff; --dark-blue: #002b5b; --white: #ffffff; }
+        :root { --ice: #00d2ff; --deep: #001f3f; --white: #ffffff; }
         body { 
-            background: radial-gradient(circle at top, #001f3f, #000); 
+            background: radial-gradient(circle at top, var(--deep), #000); 
             color: var(--white); font-family: 'Segoe UI', sans-serif; 
             margin: 0; padding: 15px; min-height: 100vh;
             background-image: url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
         }
-        .header { text-align: center; border-bottom: 2px solid var(--main-blue); padding-bottom: 10px; margin-bottom: 20px; text-shadow: 0 0 10px var(--main-blue); }
+        .header { text-align: center; border-bottom: 2px solid var(--ice); padding-bottom: 10px; margin-bottom: 20px; text-shadow: 0 0 10px var(--ice); letter-spacing: 2px; }
         
-        /* Секции цен */
-        .tabs { display: flex; justify-content: space-between; margin-bottom: 15px; }
+        .tabs { display: flex; justify-content: space-between; margin-bottom: 15px; gap: 5px; }
         .tab { 
-            background: rgba(0, 210, 255, 0.1); border: 1px solid var(--main-blue); 
-            padding: 8px 12px; font-size: 11px; cursor: pointer; flex: 1; text-align: center; margin: 0 3px;
+            background: rgba(0, 210, 255, 0.1); border: 1px solid var(--ice); 
+            padding: 10px; font-size: 10px; cursor: pointer; flex: 1; text-align: center; border-radius: 4px; transition: 0.3s;
         }
-        .tab.active { background: var(--main-blue); color: #000; font-weight: bold; }
+        .tab.active { background: var(--ice); color: #000; font-weight: bold; box-shadow: 0 0 15px var(--ice); }
 
         .card { 
-            background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(0, 210, 255, 0.3);
-            border-radius: 8px; padding: 15px; margin-bottom: 15px; position: relative;
-            backdrop-filter: blur(5px);
+            background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(0, 210, 255, 0.2);
+            border-radius: 12px; padding: 15px; margin-bottom: 20px; backdrop-filter: blur(10px);
         }
-        .hot-tag { position: absolute; top: -10px; right: 10px; background: #ff4b2b; color: #fff; padding: 2px 8px; font-size: 10px; border-radius: 4px; }
-        
-        canvas { margin-top: 10px; max-height: 150px; }
+        .skin-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .price-tag { color: var(--ice); font-weight: bold; font-size: 18px; }
+        .percent { color: #00ff00; font-size: 12px; }
 
-        .calc-input { width: 100%; background: #000; border: 1px solid var(--main-blue); color: var(--white); padding: 10px; box-sizing: border-box; border-radius: 4px; }
+        canvas { width: 100% !important; height: 180px !important; }
+
+        .calc-area { background: rgba(0, 210, 255, 0.05); border: 1px dashed var(--ice); padding: 15px; border-radius: 8px; margin-top: 20px; }
+        input { width: 100%; background: #000; border: 1px solid var(--ice); color: #fff; padding: 12px; box-sizing: border-box; border-radius: 5px; margin: 10px 0; outline: none; }
         
-        .footer-disclaimer { font-size: 9px; color: rgba(255,255,255,0.4); text-align: center; margin-top: 20px; line-height: 1.4; padding: 10px; border: 1px solid rgba(255,255,255,0.1); }
+        .disclaimer-box { font-size: 9px; color: rgba(255,255,255,0.4); text-align: justify; margin-top: 30px; line-height: 1.5; border-top: 1px solid rgba(0, 210, 255, 0.2); padding-top: 10px; }
     </style>
 </head>
 <body>
@@ -43,79 +44,85 @@
 <div class="header">🔱 NATACULT ICE ANALYTICS 🔱</div>
 
 <div class="tabs">
-    <div class="tab active" onclick="showSection('low')">LOW PRICE</div>
-    <div class="tab" onclick="showSection('med')">MEDIUM</div>
-    <div class="tab" onclick="showSection('high')">HIGH END</div>
+    <div class="tab active" onclick="loadCategory('low')">LOW PRICE</div>
+    <div class="tab" onclick="loadCategory('med')">MEDIUM</div>
+    <div class="tab" onclick="loadCategory('high')">HIGH END</div>
 </div>
 
-<div id="content-area">
-    </div>
+<div id="main-content"></div>
 
-<div class="card">
-    <div style="color: var(--main-blue); font-weight: bold; margin-bottom: 10px;">🧮 PROFIT CALCULATOR</div>
-    <input type="number" id="calc-in" class="calc-input" placeholder="Введите цену продажи ($)">
-    <div id="calc-out" style="margin-top: 10px; color: #00ff00; font-size: 14px;">ЧИСТАЯ ПРИБЫЛЬ: $0.00</div>
+<div class="calc-area">
+    <div style="font-size: 14px; font-weight: bold; color: var(--ice);">🧮 ICE PROFIT CALC</div>
+    <input type="number" id="price-in" placeholder="Введите цену продажи в $">
+    <div id="price-out" style="color: #00ff00; font-weight: bold;">ВЫПЛАТА: $0.00</div>
+    <div style="font-size: 10px; opacity: 0.6; margin-top: 5px;">*Учтена комиссия Steam Market (13%)</div>
 </div>
 
-<div class="footer-disclaimer">
-    <b>LEGAL NOTICE:</b> Данный программный продукт является аналитическим инструментом и не предоставляет индивидуальных финансовых рекомендаций. Торговля внутриигровыми предметами сопряжена с высокими рисками. NATACULT не несет ответственности за ваши торговые решения.
+<div class="disclaimer-box">
+    <b>DISCLAIMER:</b> Представленные данные не являются офертой или финансовой рекомендацией (NFA). Все графики построены на основе исторических данных CS2 Market API. NATACULT не несет ответственности за волатильность активов и возможные убытки. Торгуйте с холодной головой.
 </div>
 
 <script>
     let tg = window.Telegram.WebApp;
     tg.expand();
-    tg.setHeaderColor('#001f3f');
 
-    const data = {
-        low: [ { name: "Recoil Case", profit: "+28%", history: [1, 1.2, 1.1, 1.5, 1.4, 1.8] } ],
-        med: [ { name: "AK-47 | Slate (FN)", profit: "+15%", history: [8, 9, 8.5, 10, 9.8, 11] } ],
-        high: [ { name: "M4A1-S | Hot Rod", profit: "+12%", history: [900, 950, 920, 980, 1050, 1080] } ]
+    const db = {
+        low: { name: "Recoil Case", grow: "+142%", history: [10, 25, 45, 80, 110, 142], labels: ['Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Now'] },
+        med: { name: "AK-47 | Slate (FN)", grow: "+64%", history: [5, 12, 18, 35, 50, 64], labels: ['Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Now'] },
+        high: { name: "Butterfly | Doppler (FN)", grow: "+214%", history: [20, 85, 120, 160, 190, 214], labels: ['Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Now'] }
     };
 
-    function showSection(type) {
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        event.target.classList.add('active');
-        
-        const area = document.getElementById('content-area');
-        area.innerHTML = '';
-        
-        data[type].forEach((item, index) => {
-            const id = `chart-${type}-${index}`;
-            area.innerHTML += `
-                <div class="card">
-                    <span class="hot-tag">HOT 🔥</span>
-                    <div style="font-weight: bold;">${item.name}</div>
-                    <div style="color: #00ff00; font-size: 18px; margin: 5px 0;">${item.profit} EXPECTED</div>
-                    <canvas id="${id}"></canvas>
-                </div>
-            `;
-            setTimeout(() => renderChart(id, item.history), 100);
-        });
-    }
+    let currentChart = null;
 
-    function renderChart(id, points) {
-        const ctx = document.getElementById(id).getContext('2d');
-        new Chart(ctx, {
+    function loadCategory(cat) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+
+        const item = db[cat];
+        const container = document.getElementById('main-content');
+        container.innerHTML = `
+            <div class="card">
+                <div class="skin-info">
+                    <span style="font-size: 14px;">${item.name}</span>
+                    <span class="percent">All-time: ${item.grow}</span>
+                </div>
+                <canvas id="mainChart"></canvas>
+            </div>
+        `;
+
+        if(currentChart) currentChart.destroy();
+        const ctx = document.getElementById('mainChart').getContext('2d');
+        currentChart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: ['', '', '', '', '', ''],
+                labels: item.labels,
                 datasets: [{
-                    data: points,
+                    label: 'Рост %',
+                    data: item.history,
                     borderColor: '#00d2ff',
-                    borderWidth: 2,
+                    backgroundColor: 'rgba(0, 210, 255, 0.1)',
+                    fill: true,
                     tension: 0.4,
-                    pointRadius: 0
+                    borderWidth: 3,
+                    pointBackgroundColor: '#fff'
                 }]
             },
-            options: { plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } }
+            options: {
+                responsive: true,
+                scales: {
+                    y: { ticks: { color: '#aaa', callback: v => v + '%' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                    x: { ticks: { color: '#aaa' }, grid: { display: false } }
+                },
+                plugins: { legend: { display: false } }
+            }
         });
     }
 
-    document.getElementById('calc-in').addEventListener('input', (e) => {
-        document.getElementById('calc-out').innerText = "ЧИСТАЯ ПРИБЫЛЬ: $" + (e.target.value * 0.87).toFixed(2);
+    document.getElementById('price-in').addEventListener('input', (e) => {
+        document.getElementById('price-out').innerText = "ВЫПЛАТА: $" + (e.target.value * 0.87).toFixed(2);
     });
 
-    showSection('low');
+    loadCategory('low');
 </script>
 </body>
 </html>
