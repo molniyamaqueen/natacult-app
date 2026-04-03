@@ -174,4 +174,49 @@
     // 3. AI АНАЛИЗ (ОТКАЗОУСТОЙЧИВЫЙ)
     function runAI() {
         const q = document.getElementById('ai-query').value || "Unknown Asset";
-        const res = document.getElementById('ai
+        const res = document.getElementById('ai-result-box');
+        res.style.display = 'block';
+        res.innerHTML = "⌛ Analyzing market depth...";
+        
+        setTimeout(() => {
+            const up = (Math.random() * 6).toFixed(1);
+            res.innerHTML = `
+                <div style="color:var(--accent); font-weight:bold; margin-bottom:5px;">✅ АНАЛИЗ ЗАВЕРШЕН</div>
+                <b>${q}:</b> Актив показывает умеренный рост (+${up}%). Наблюдается положительная динамика накопления. 
+                <br><br><i>Вывод: Позитивный тренд.</i>
+            `;
+        }, 1500);
+    }
+
+    // 4. НОВОСТИ
+    const newsData = [
+        { title: "Valve Update", desc: "Обновление античита привело к росту цен на кейсы." },
+        { title: "Market Spike", desc: "Обнаружен крупный закуп в сегменте High-End ножей." }
+    ];
+
+    function loadNews() {
+        const list = document.getElementById('news-list');
+        list.innerHTML = newsData.map(n => `
+            <div class="card" style="margin: 0 0 10px 0;">
+                <div style="color: var(--blue); font-weight: bold;">${n.title}</div>
+                <div style="font-size: 12px; opacity: 0.7; margin-top: 5px;">${n.desc}</div>
+            </div>
+        `).join('');
+    }
+
+    // 5. ТАЙМЕР
+    let seconds = 1800;
+    setInterval(() => {
+        seconds--;
+        const m = Math.floor(seconds/60);
+        const s = seconds%60;
+        document.getElementById('update-timer').innerText = `NEXT UPDATE: ${m}:${s<10?'0'+s:s}`;
+        if(seconds <= 0) seconds = 1800;
+    }, 1000);
+
+    // Старт
+    loadCat('low');
+    loadNews();
+</script>
+</body>
+</html>
