@@ -1,209 +1,43 @@
 <!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NATACULT NEURAL TERMINAL</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        :root { --blue: #00d2ff; --dark: #000814; --glass: rgba(255, 255, 255, 0.05); --accent: #00ffcc; --red: #ff4b2b; }
-        
-        body { 
-            background: radial-gradient(circle at top right, #001d3d 0%, var(--dark) 100%); 
-            color: #fff; font-family: 'Inter', sans-serif; margin: 0; padding: 0; overflow: hidden;
-        }
-
-        /* Навигация */
-        .screen { display: none; height: 100vh; overflow-y: auto; padding-bottom: 110px; box-sizing: border-box; }
-        .screen.active { display: block; animation: fadeIn 0.4s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-
-        .nav-bar { 
-            position: fixed; bottom: 15px; left: 10px; right: 10px; 
-            background: rgba(0, 10, 25, 0.85); backdrop-filter: blur(20px); 
-            display: flex; border-radius: 20px; border: 1px solid rgba(0, 210, 255, 0.2); z-index: 1000; 
-        }
-        .nav-item { flex: 1; text-align: center; padding: 12px 0; font-size: 10px; color: #557a95; cursor: pointer; transition: 0.3s; }
-        .nav-item.active { color: var(--blue); text-shadow: 0 0 15px var(--blue); }
-        .nav-item span { display: block; font-size: 22px; margin-bottom: 2px; }
-
-        /* UI Карточки */
-        .card { 
-            background: var(--glass); border: 1px solid rgba(255, 255, 255, 0.1); 
-            border-radius: 22px; padding: 18px; margin: 15px; backdrop-filter: blur(15px);
-            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-        }
-        .item-img { width: 55px; height: 55px; border-radius: 12px; background: rgba(255,255,255,0.03); padding: 5px; object-fit: contain; }
-        .price { font-size: 20px; font-weight: 900; color: var(--blue); }
-        
-        /* Кнопки и Табы */
-        .tabs { display: flex; gap: 8px; padding: 0 15px; margin: 15px 0; }
-        .tab { flex: 1; padding: 12px; background: var(--glass); border: 1px solid rgba(0, 210, 255, 0.2); border-radius: 12px; color: var(--blue); font-size: 10px; font-weight: bold; text-align: center; }
-        .tab.active { background: var(--blue); color: #000; box-shadow: 0 0 15px var(--blue); }
-
-        input { width: 100%; padding: 15px; background: rgba(0,0,0,0.5); border: 1px solid var(--blue); color: #fff; border-radius: 15px; margin: 10px 0; box-sizing: border-box; outline: none; }
-        button { background: var(--blue); color: #000; border: none; border-radius: 15px; padding: 15px; font-weight: 900; width: 100%; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; }
-
-        /* AI Box */
-        .ai-box { border-left: 4px solid var(--blue); padding: 15px; margin-top: 15px; font-size: 13px; line-height: 1.5; background: rgba(0,210,255,0.05); border-radius: 0 15px 15px 0; }
-        
-        /* Секретный лог */
-        #whale-scanner { font-family: monospace; color: var(--accent); font-size: 10px; padding: 15px; display: none; background: #000; border: 1px solid var(--accent); margin: 15px; border-radius: 10px; }
-    </style>
-</head>
-<body>
-
-    <div style="padding: 25px 20px 5px 20px; text-align: center;">
-        <div id="main-logo" style="font-size: 26px; font-weight: 900; letter-spacing: 3px; text-shadow: 0 0 20px var(--blue); cursor: pointer;" onclick="secretTap()">NATACULT<span style="color:var(--blue)">OS</span></div>
-        <div id="whale-scanner">>> SECURE NODE INITIALIZED...</div>
-    </div>
-
-    <div id="screen-market" class="screen active">
-        <div class="tabs">
-            <div class="tab active" onclick="loadCat('low', this)">LOW</div>
-            <div class="tab" onclick="loadCat('med', this)">MED</div>
-            <div class="tab" onclick="loadCat('high', this)">HIGH</div>
-        </div>
-        <div id="market-list"></div>
-    </div>
-
-    <div id="screen-ai" class="screen">
-        <div class="card">
-            <div style="font-size: 45px; margin-bottom: 10px;">🧠</div>
-            <h2 style="margin:0">Neural Analyzer</h2>
-            <p style="opacity: 0.6; font-size: 12px;">Введите скин для глубокого сканирования паттернов.</p>
-            <input type="text" id="ai-input" placeholder="Напр: AK-47 Nightwish">
-            <button onclick="startNeuralScan()">ЗАПУСТИТЬ AI СКАН</button>
-            <div id="ai-response" class="ai-box" style="display:none;"></div>
-        </div>
-    </div>
-
-    <div id="screen-news" class="screen">
-        <div id="news-container" style="padding: 5px;"></div>
-    </div>
-
-    <div id="screen-status" class="screen">
-        <div class="card" style="text-align: center; padding: 40px 20px;">
-            <div style="font-size: 55px; margin-bottom: 15px;">💹</div>
-            <div style="background: rgba(0,255,204,0.1); color: var(--accent); padding: 5px 15px; border-radius: 8px; display: inline-block; font-size: 12px; font-weight: bold;">MARKET: BULLISH</div>
-            <h1 style="margin: 15px 0;">STRONG UP</h1>
-            <p style="opacity: 0.6; font-size: 13px;">Sentiment Index: Extreme Greed (78/100)</p>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 30px;">
-                <div style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.05);">
-                    <div style="font-size: 10px; opacity: 0.5;">VOLUME 24H</div>
-                    <div style="font-size: 18px; font-weight: bold; color: var(--blue);">$18.4M</div>
-                </div>
-                <div style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.05);">
-                    <div style="font-size: 10px; opacity: 0.5;">SENTIMENT</div>
-                    <div style="font-size: 18px; font-weight: bold; color: var(--accent);">78/100</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="nav-bar">
-        <div class="nav-item active" onclick="showScr('market', this)"><span>📊</span>Market</div>
-        <div class="nav-item" onclick="showScr('ai', this)"><span>🧠</span>Neural</div>
-        <div class="nav-item" onclick="showScr('news', this)"><span>📰</span>Feeds</div>
-        <div class="nav-item" onclick="showScr('status', this)"><span>📈</span>Status</div>
-    </div>
-
+<html lang="ru"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>NATACULT OS</title><script src="https://telegram.org/js/telegram-web-app.js"></script><script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+:root{--b:#00d2ff;--d:#000814;--g:rgba(255,255,255,0.05);--a:#00ffcc}
+body{background:radial-gradient(circle at top right,#001d3d,var(--d));color:#fff;font-family:sans-serif;margin:0;overflow:hidden}
+.s{display:none;height:100vh;overflow-y:auto;padding-bottom:100px;box-sizing:border-box}
+.s.active{display:block;animation:f .3s}@keyframes f{from{opacity:0}to{opacity:1}}
+.nav{position:fixed;bottom:15px;left:10px;right:10px;background:rgba(0,10,25,0.9);backdrop-filter:blur(15px);display:flex;border-radius:20px;border:1px solid rgba(0,210,255,0.2);z-index:1000}
+.ni{flex:1;text-align:center;padding:12px 0;font-size:10px;color:#557a95;cursor:pointer}
+.ni.active{color:var(--b);text-shadow:0 0 10px var(--b)}
+.ni span{display:block;font-size:20px}
+.card{background:var(--g);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:15px;margin:12px;backdrop-filter:blur(10px)}
+.img{width:50px;height:50px;border-radius:10px;background:rgba(255,255,255,0.05);object-fit:contain}
+.tabs{display:flex;gap:5px;padding:0 12px;margin:10px 0}
+.t{flex:1;padding:10px;background:var(--g);border:1px solid rgba(0,210,255,0.2);border-radius:10px;color:var(--b);font-size:10px;text-align:center}
+.t.active{background:var(--b);color:#000}
+input{width:100%;padding:12px;background:#000;border:1px solid var(--b);color:#fff;border-radius:10px;margin:10px 0;outline:none}
+button{background:var(--b);color:#000;border:none;border-radius:10px;padding:12px;font-weight:900;width:100%;cursor:pointer}
+#w{font-family:monospace;color:var(--a);font-size:9px;padding:10px;display:none;background:#000;border:1px solid var(--a);margin:10px;border-radius:8px}
+</style></head><body>
+<div style="padding:20px;text-align:center"><div id="l" style="font-size:22px;font-weight:900;letter-spacing:2px;cursor:pointer" onclick="st()">NATACULT<span style="color:var(--b)">OS</span></div><div id="w">>> SECURE NODE...</div></div>
+<div id="sm" class="s active"><div class="tabs"><div class="t active" onclick="lc('low',this)">LOW</div><div class="t" onclick="lc('med',this)">MED</div><div class="t" onclick="lc('high',this)">HIGH</div></div><div id="ml"></div></div>
+<div id="sa" class="s"><div class="card"><h3>AI Analyzer</h3><p style="font-size:11px;opacity:0.6">Deep pattern scan...</p><input id="ai-i" placeholder="AK-47 Slate..."><button onclick="rn()">SCAN ASSET</button><div id="ai-r" style="display:none;margin-top:10px;padding:10px;background:rgba(0,210,255,0.05);border-left:3px solid var(--b);font-size:12px"></div></div></div>
+<div id="sn" class="s"><div id="nl"></div></div>
+<div id="ss" class="s"><div class="card" style="text-align:center"><h2>BULLISH</h2><p>Sentiment: 78/100 (Greed)</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px"><div class="card" style="margin:0">Vol: $18.4M</div><div class="card" style="margin:0">ROI: +12%</div></div></div></div>
+<div class="nav"><div class="ni active" onclick="sw('m',this)"><span>📊</span>Market</div><div class="ni" onclick="sw('a',this)"><span>🧠</span>Neural</div><div class="ni" onclick="sw('n',this)"><span>📰</span>News</div><div class="ni" onclick="sw('s',this)"><span>📈</span>Status</div></div>
 <script>
-    const tg = window.Telegram.WebApp;
-    tg.expand();
-
-    // Навигация
-    function showScr(id, el) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.getElementById('screen-' + id).classList.add('active');
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        el.classList.add('active');
-    }
-
-    // База данных
-    const db = {
-        low: [
-            { n: "Recoil Case", p: "$1.45", g: "+3.2%", i: "https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwIdel6KvvlYYRIZeJAbwjM_R-E6beYpYUCYf70YVs4e_R_I-96LDZPYf-YvM-M-Vf-M-Xf", h: [1.1, 1.4, 1.2, 1.45, 1.45] },
-            { n: "Fracture Case", p: "$0.85", g: "+1.5%", i: "https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwIdel6KvvlYYRIZeJAbwjM_R-E6beYpYUCYf70YVs4e_R_I-96LDZPYf-YvM-M-Vf-M-Xf", h: [0.7, 0.8, 0.82, 0.85, 0.85] }
-        ],
-        med: [
-            { n: "AK-47 | Slate (FN)", p: "$12.80", g: "+4.1%", i: "https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwIdel6KvvlYYRIZeJAbwjM_R-E6beYpYUCYf70YVs4e_R_I-96LDZPYf-YvM-M-Vf-M-Xf", h: [10, 11, 12, 12.8, 12.8] }
-        ],
-        high: [
-            { n: "Butterfly Doppler", p: "$1840", g: "+12.4%", i: "https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwIdel6KvvlYYRIZeJAbwjM_R-E6beYpYUCYf70YVs4e_R_I-96LDZPYf-YvM-M-Vf-M-Xf", h: [1500, 1600, 1840, 1800, 1840] }
-        ]
-    };
-
-    function loadCat(cat, el) {
-        if(el) { document.querySelectorAll('.tab').forEach(t => t.classList.remove('active')); el.classList.add('active'); }
-        const list = document.getElementById('market-list');
-        list.innerHTML = '';
-        db[cat].forEach((item, i) => {
-            const cid = `chart-${cat}-${i}`;
-            list.innerHTML += `
-                <div class="card">
-                    <div style="display: flex; gap: 15px; align-items: center;">
-                        <img src="${item.i}" class="item-img">
-                        <div style="flex:1">
-                            <div style="font-weight: bold; font-size: 14px;">${item.n}</div>
-                            <div class="price">${item.p}</div>
-                        </div>
-                        <div style="text-align: right; color: var(--accent); font-weight: bold;">${item.g}</div>
-                    </div>
-                    <canvas id="${cid}" style="max-height: 70px; margin-top: 15px;"></canvas>
-                </div>`;
-            setTimeout(() => {
-                new Chart(document.getElementById(cid), {
-                    type: 'line',
-                    data: { labels: [1,2,3,4,5], datasets: [{ data: item.h, borderColor: '#00d2ff', borderWidth: 2, tension: 0.4, pointRadius: 0, fill: true, backgroundColor: 'rgba(0, 210, 255, 0.05)' }] },
-                    options: { plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } }
-                });
-            }, 100);
-        });
-    }
-
-    // AI Анализ по ТЗ
-    function startNeuralScan() {
-        const val = document.getElementById('ai-input').value || "Asset";
-        const box = document.getElementById('ai-response');
-        box.style.display = 'block';
-        box.innerHTML = "⌛ СКАНИРОВАНИЕ РЫНКА...";
-        setTimeout(() => {
-            const ch = (Math.random() * 6 + 1).toFixed(1);
-            box.innerHTML = `
-                <b style="color:var(--blue)">${val.toUpperCase()}</b>: Данный актив показывает высокую плотность закупа. <br><br>
-                📈 Рост: +${ch}% за 24ч<br>
-                🎯 Статус: РОСТ (Позитивный тренд)
-            `;
-        }, 1500);
-    }
-
-    // Новости
-    const news = [
-        { t: "Whale Alert", d: "Крупный инвестор выставил ордер на 10x Dragon Lore." },
-        { t: "Valve Update", d: "Обновление Steam привело к росту цен на старые кейсы." }
-    ];
-
-    function loadNews() {
-        document.getElementById('news-container').innerHTML = news.map(n => `
-            <div class="card" style="margin-bottom: 10px;">
-                <div style="color: var(--blue); font-weight: bold;">${n.t}</div>
-                <div style="font-size: 12px; opacity: 0.7; margin-top: 5px;">${n.d}</div>
-            </div>`).join('');
-    }
-
-    // Пасхалка
-    let tapCount = 0;
-    function secretTap() {
-        tapCount++;
-        if(tapCount >= 5) {
-            document.getElementById('whale-scanner').style.display = 'block';
-            document.getElementById('whale-scanner').innerHTML += "<br>>> DETECTED: 50x Karambit buy order";
-        }
-    }
-
-    loadCat('low'); loadNews();
-</script>
-</body>
-</html>
+const tg=window.Telegram.WebApp;tg.expand();
+function sw(i,e){document.querySelectorAll('.s').forEach(x=>x.classList.remove('active'));document.getElementById('s'+i).classList.add('active');document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));e.classList.add('active')}
+const db={
+low:[{n:"Recoil Case",p:"$1.45",g:"+3.2%",i:"https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwIdel6KvvlYYRIZeJAbwjM_R-E6beYpYUCYf70YVs4e_R_I-96LDZPYf-YvM-M-Vf-M-Xf",h:[1,1.4,1.2,1.45]}],
+med:[{n:"AK-47 Slate",p:"$12.8",g:"+4.1%",i:"https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwIdel6KvvlYYRIZeJAbwjM_R-E6beYpYUCYf70YVs4e_R_I-96LDZPYf-YvM-M-Vf-M-Xf",h:[10,12,11,12.8]}],
+high:[{n:"Doppler Knife",p:"$1840",g:"+12%",i:"https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwIdel6KvvlYYRIZeJAbwjM_R-E6beYpYUCYf70YVs4e_R_I-96LDZPYf-YvM-M-Vf-M-Xf",h:[1500,1800,1700,1840]}]};
+function lc(c,e){if(e){document.querySelectorAll('.t').forEach(x=>x.classList.remove('active'));e.classList.add('active')}
+const l=document.getElementById('ml');l.innerHTML='';db[c].forEach((it,i)=>{const id=`c-${c}-${i}`;l.innerHTML+=`<div class="card"><div style="display:flex;gap:10px;align-items:center"><img src="${it.i}" class="img"><div style="flex:1"><b>${it.n}</b><div style="color:var(--b)">${it.p}</div></div><div style="color:var(--a)">${it.g}</div></div><canvas id="${id}" style="max-height:60px;margin-top:10px"></canvas></div>`;
+setTimeout(()=>{new Chart(document.getElementById(id),{type:'line',data:{labels:[1,2,3,4],datasets:[{data:it.h,borderColor:'#00d2ff',borderWidth:2,pointRadius:0,fill:true,backgroundColor:'rgba(0,210,255,0.05)'}]},options:{plugins:{legend:{display:false}},scales:{x:{display:false},y:{display:false}}}})},100)})}
+function rn(){const v=document.getElementById('ai-i').value||"Asset";const r=document.getElementById('ai-r');r.style.display='block';r.innerHTML="⌛ SCANNIG...";
+setTimeout(()=>{const ch=(Math.random()*5+1).toFixed(1);r.innerHTML=`<b>${v.toUpperCase()}</b>: Актив востребован на Buff163. <br>📈 Рост: +${ch}% <br>🎯 Статус: РОСТ (Позитивно)`;},1200)}
+let tc=0;function st(){tc++;if(tc>=5){document.getElementById('w').style.display='block';document.getElementById('w').innerHTML+="<br>>> WHALE ORDER: 50x Knives detected";}}
+const news=[{t:"Whale Alert",d:"Крупный закуп на $50k в скинах Doppler."},{t:"Valve",d:"Обновление цен в Steam."}];
+document.getElementById('nl').innerHTML=news.map(n=>`<div class="card"><b style="color:var(--b)">${n.t}</b><div style="font-size:12px;opacity:0.7">${n.d}</div></div>`).join('');
+lc('low');</script></body></html>
