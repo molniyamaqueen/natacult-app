@@ -3,59 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
     <title>NATACULT PRO TERMINAL</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root { --blue: #00d2ff; --dark: #000814; --glass: rgba(255, 255, 255, 0.07); --accent: #00ffcc; --red: #ff4b2b; }
-        
-        body { 
-            background: radial-gradient(circle at top right, #001d3d 0%, var(--dark) 100%); 
+
+        body {
+            background: radial-gradient(circle at top right, #001d3d 0%, var(--dark) 100%);
             color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; overflow: hidden;
         }
 
-        /* Навигация */
         .screen { display: none; height: 100vh; overflow-y: auto; padding-bottom: 100px; box-sizing: border-box; }
         .screen.active { display: block; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .nav-bar { 
-            position: fixed; bottom: 0; width: 100%; background: rgba(0, 8, 20, 0.95); 
-            backdrop-filter: blur(20px); display: flex; border-top: 1px solid rgba(0, 210, 255, 0.2); z-index: 1000; 
+        #screen-lang {
+            position: fixed;
+            inset: 0;
+            z-index: 2000;
+            box-sizing: border-box;
+            padding: 20px;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        #screen-lang.screen.active {
+            display: flex !important;
+            animation: none;
+        }
+
+        .lang-btn {
+            transition: transform 0.25s ease, background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+        }
+        .lang-btn:hover {
+            background: rgba(255, 255, 255, 0.07) !important;
+            border-color: rgba(0, 210, 255, 0.55) !important;
+            box-shadow: 0 0 28px rgba(0, 210, 255, 0.35), 0 0 56px rgba(0, 210, 255, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+        }
+        .lang-btn:active {
+            transform: scale(0.95);
+            background: rgba(0, 210, 255, 0.1) !important;
+            border-color: var(--blue) !important;
+            box-shadow: 0 0 20px rgba(0, 210, 255, 0.45);
+        }
+
+        .nav-bar {
+            position: fixed; bottom: 0; width: 100%; background: rgba(0, 8, 20, 0.95);
+            backdrop-filter: blur(20px); display: flex; border-top: 1px solid rgba(0, 210, 255, 0.2); z-index: 1000;
         }
         .nav-item { flex: 1; text-align: center; padding: 12px 0; font-size: 10px; color: #668ba4; cursor: pointer; transition: 0.3s; }
         .nav-item.active { color: var(--blue); text-shadow: 0 0 10px var(--blue); }
         .nav-item span { display: block; font-size: 20px; margin-bottom: 2px; }
 
-        /* Элементы UI */
         .card { background: var(--glass); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 18px; margin: 15px; backdrop-filter: blur(10px); position: relative; transition: 0.3s; }
         .card:active { transform: scale(0.98); }
         .status-badge { display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: bold; margin-bottom: 8px; text-transform: uppercase; }
         .up { background: rgba(0, 255, 204, 0.15); color: var(--accent); }
-        
+
         .tabs { display: flex; gap: 8px; padding: 0 15px; margin: 10px 0; }
-        .tab { flex: 1; padding: 10px; background: var(--glass); border: 1px solid rgba(0, 210, 255, 0.2); border-radius: 10px; color: var(--blue); font-size: 10px; font-weight: bold; text-align: center; }
+        .tab { flex: 1; padding: 10px; background: var(--glass); border: 1px solid rgba(0, 210, 255, 0.2); border-radius: 10px; color: var(--blue); font-size: 10px; font-weight: bold; text-align: center; cursor: pointer; }
         .tab.active { background: var(--blue); color: #000; box-shadow: 0 0 15px var(--blue); }
 
         input { width: 100%; padding: 14px; background: rgba(0,0,0,0.4); border: 1px solid rgba(0, 210, 255, 0.3); color: #fff; border-radius: 12px; margin: 10px 0; box-sizing: border-box; outline: none; }
         button { background: var(--blue); color: #000; border: none; border-radius: 12px; padding: 14px; font-weight: 900; width: 100%; cursor: pointer; letter-spacing: 1px; }
-        
+
         .price { font-size: 22px; font-weight: 900; color: var(--blue); }
         .ai-box { border-left: 3px solid var(--blue); padding-left: 12px; margin-top: 15px; font-size: 13px; line-height: 1.5; background: rgba(0,210,255,0.05); padding: 15px; border-radius: 0 10px 10px 0; }
-        
+
         .item-img { width: 60px; height: 60px; object-fit: contain; filter: drop-shadow(0 0 5px rgba(0,210,255,0.3)); }
         #whale-log { font-family: monospace; font-size: 9px; color: var(--accent); display: none; padding: 10px; background: #000; border: 1px solid var(--accent); margin: 15px; border-radius: 10px; }
     </style>
 </head>
 <body>
 
-    <div id="screen-market" class="screen active">
+    <div id="screen-lang" class="screen active" style="background: radial-gradient(circle at center, #002b5b 0%, #000814 100%);">
+        <div style="margin-bottom: 40px; text-align: center;">
+            <div style="font-size: 50px; filter: drop-shadow(0 0 15px var(--blue));">🔱</div>
+            <h1 style="letter-spacing: 5px; font-weight: 900; margin-top: 10px; color: #e8f4ff;">PRIME <span style="color:var(--blue)">NODE</span></h1>
+            <p style="font-size: 10px; opacity: 0.5; letter-spacing: 2px; color: #a8c4e0;">NEURAL QUANTUM TERMINAL</p>
+        </div>
+        <p style="margin-bottom: 20px; font-size: 12px; opacity: 0.7; letter-spacing: 1px; color: #b8d4f0;">CHOOSE INTERFACE LANGUAGE</p>
+        <div style="width: 80%; max-width: 360px; display: flex; flex-direction: column; gap: 15px;">
+            <div class="lang-btn" onclick="setLang('ru')" style="display: flex; align-items: center; justify-content: space-between; padding: 20px; background: rgba(255,255,255,0.05); border: 1px solid rgba(0,210,255,0.25); border-radius: 20px; backdrop-filter: blur(16px) saturate(1.35); -webkit-backdrop-filter: blur(16px) saturate(1.35); cursor: pointer;">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <span style="font-size: 24px;">🇷🇺</span>
+                    <span style="font-weight: bold; letter-spacing: 1px; color: #e8f4ff;">RUSSIAN</span>
+                </div>
+                <span style="color: var(--blue); text-shadow: 0 0 12px rgba(0,210,255,0.8);">→</span>
+            </div>
+            <div class="lang-btn" onclick="setLang('en')" style="display: flex; align-items: center; justify-content: space-between; padding: 20px; background: rgba(255,255,255,0.05); border: 1px solid rgba(0,210,255,0.25); border-radius: 20px; backdrop-filter: blur(16px) saturate(1.35); -webkit-backdrop-filter: blur(16px) saturate(1.35); cursor: pointer;">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <span style="font-size: 24px;">🇺🇸</span>
+                    <span style="font-weight: bold; letter-spacing: 1px; color: #e8f4ff;">ENGLISH</span>
+                </div>
+                <span style="color: var(--blue); text-shadow: 0 0 12px rgba(0,210,255,0.8);">→</span>
+            </div>
+        </div>
+        <div style="position: absolute; bottom: 30px; font-size: 9px; opacity: 0.3; color: #7aa8cc;">SECURE CONNECTION ESTABLISHED</div>
+    </div>
+
+    <div id="screen-market" class="screen">
         <div style="padding: 20px 20px 0 20px; text-align: left;">
             <div id="main-logo" style="font-size: 24px; font-weight: 900; cursor: pointer;" onclick="secretTap()">TERMINAL <span style="color:var(--blue)">PRO</span></div>
             <div id="update-timer" style="font-size: 10px; color: var(--accent); margin-top: 5px;">NEXT UPDATE: 29:59</div>
         </div>
         <div id="whale-log">>> INITIALIZING SECURE SCAN...</div>
-        
+
         <div class="tabs">
             <div class="tab active" onclick="loadCat('low', this)">LOW</div>
             <div class="tab" onclick="loadCat('med', this)">MEDIUM</div>
@@ -70,7 +127,7 @@
             <h3>AI Predict Engine</h3>
             <p style="font-size: 12px; opacity: 0.7;">Введите название скина. Нейросеть проанализирует волатильность и объемы закупа.</p>
             <input type="text" id="ai-query" placeholder="Напр: AK-47 Nightwish">
-            <button onclick="runAI()">ЗАПУСТИТЬ СКАНИРОВАНИЕ</button>
+            <button type="button" onclick="runAI()">ЗАПУСТИТЬ СКАНИРОВАНИЕ</button>
             <div id="ai-result-box" style="display:none;" class="ai-box"></div>
         </div>
     </div>
@@ -88,7 +145,7 @@
             <div class="status-badge up" style="font-size: 14px; padding: 8px 20px;">MARKET STATUS: BULLISH</div>
             <h2 style="margin: 10px 0;">STRONG UP</h2>
             <div style="opacity: 0.6; font-size: 12px; margin-bottom: 30px;">Sentiment: Extreme Greed (78/100)</div>
-            
+
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                 <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px;">
                     <div style="font-size: 10px; opacity: 0.5;">VOLUME (24H)</div>
@@ -110,15 +167,70 @@
     </div>
 
 <script>
+    (function () {
+        try {
+            if (new URLSearchParams(location.search).get('reset') === '1') {
+                localStorage.removeItem('ui_lang');
+                const clean = location.href.split('?')[0];
+                history.replaceState({}, '', clean);
+            }
+        } catch (e) {}
+    })();
+
     const tg = window.Telegram.WebApp;
     tg.expand();
 
+    let marketContentLoaded = false;
+
+    function initMarketContent() {
+        if (marketContentLoaded) return;
+        marketContentLoaded = true;
+        loadCat('low');
+        loadNews();
+    }
+
     function showScreen(id, el) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.screen').forEach(s => {
+            if (s.id === 'screen-lang') return;
+            s.classList.remove('active');
+        });
         document.getElementById('screen-' + id).classList.add('active');
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         el.classList.add('active');
     }
+
+    function setLang(lang) {
+        try { localStorage.setItem('ui_lang', lang); } catch (e) {}
+        console.log('Selected language:', lang);
+
+        const langScreen = document.getElementById('screen-lang');
+        langScreen.style.opacity = '0';
+        langScreen.style.transition = 'opacity 0.5s ease';
+
+        setTimeout(() => {
+            langScreen.classList.remove('active');
+            langScreen.style.display = 'none';
+
+            document.getElementById('screen-market').classList.add('active');
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(n => n.classList.remove('active'));
+            if (navItems[0]) navItems[0].classList.add('active');
+
+            initMarketContent();
+        }, 500);
+    }
+
+    (function () {
+        try {
+            if (!localStorage.getItem('ui_lang')) return;
+            const langScreen = document.getElementById('screen-lang');
+            langScreen.classList.remove('active');
+            langScreen.style.display = 'none';
+            langScreen.style.opacity = '1';
+            document.getElementById('screen-market').classList.add('active');
+            initMarketContent();
+        } catch (e) {}
+    })();
 
     const db = {
         low: [
@@ -135,7 +247,7 @@
     };
 
     function loadCat(cat, el) {
-        if(el) {
+        if (el) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             el.classList.add('active');
         }
@@ -151,7 +263,7 @@
                             <div style="font-weight: bold; font-size: 15px; margin-bottom: 5px;">${item.name}</div>
                             <div class="price">${item.price}</div>
                         </div>
-                        <img src="${item.img}" class="item-img">
+                        <img src="${item.img}" class="item-img" alt="">
                     </div>
                     <div style="color: var(--accent); font-size: 12px; margin-top: 10px;">📊 Dynamic: ${item.grow}</div>
                     <canvas id="${canvasId}" style="max-height: 80px; margin-top:15px;"></canvas>
@@ -162,7 +274,9 @@
     }
 
     function renderChart(id, data) {
-        const ctx = document.getElementById(id).getContext('2d');
+        const el = document.getElementById(id);
+        if (!el) return;
+        const ctx = el.getContext('2d');
         new Chart(ctx, {
             type: 'line',
             data: {
@@ -181,7 +295,7 @@
         const res = document.getElementById('ai-result-box');
         res.style.display = 'block';
         res.innerHTML = "⌛ Analyzing liquidity patterns & order books...";
-        
+
         setTimeout(() => {
             const up = (Math.random() * 8 + 1).toFixed(1);
             res.innerHTML = `
@@ -213,7 +327,7 @@
     let taps = 0;
     function secretTap() {
         taps++;
-        if(taps >= 5) {
+        if (taps >= 5) {
             const log = document.getElementById('whale-log');
             log.style.display = 'block';
             log.innerHTML += "<br>>> DETECTED: 50x M4A4 Howl buy order from Chinese Private IP";
@@ -225,12 +339,10 @@
         seconds--;
         const m = Math.floor(seconds/60);
         const s = seconds%60;
-        document.getElementById('update-timer').innerText = `NEXT UPDATE: ${m}:${s<10?'0'+s:s}`;
-        if(seconds <= 0) seconds = 1800;
+        const el = document.getElementById('update-timer');
+        if (el) el.innerText = `NEXT UPDATE: ${m}:${s<10?'0'+s:s}`;
+        if (seconds <= 0) seconds = 1800;
     }, 1000);
-
-    loadCat('low');
-    loadNews();
 </script>
 </body>
 </html>
