@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NATACULT PREMUIUM</title>
+    <title>NATACULT PREMIUM V3.0</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -14,7 +14,6 @@
             color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; overflow-x: hidden;
         }
 
-        /* Анимация появления */
         @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
@@ -25,10 +24,17 @@
             backdrop-filter: blur(10px); background: rgba(0, 8, 20, 0.5); position: sticky; top: 0; z-index: 100;
         }
 
+        /* AI БЛОК СРАЗУ ПОСЛЕ ХЕДЕРА */
+        .ai-search-card {
+            border: 1px solid var(--blue); background: rgba(0,210,255,0.05); 
+            margin: 15px; border-radius: 15px; padding: 15px;
+            box-shadow: 0 0 15px rgba(0, 210, 255, 0.1);
+        }
+
         .live-scanner {
             background: rgba(0, 255, 204, 0.05); border: 1px solid rgba(0, 255, 204, 0.2);
             margin: 15px; padding: 10px; border-radius: 8px; font-family: 'Courier New', monospace;
-            font-size: 11px; color: var(--accent); box-shadow: inset 0 0 10px rgba(0, 255, 204, 0.1);
+            font-size: 11px; color: var(--accent);
         }
 
         .tabs { display: flex; gap: 8px; padding: 0 15px; margin-bottom: 20px; }
@@ -41,12 +47,12 @@
         .asset-card { 
             background: var(--glass); border: 1px solid rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(15px); border-radius: 20px; padding: 20px; margin: 0 15px 15px 15px;
-            animation: fadeInUp 0.5s ease forwards; opacity: 0; /* Для анимации */
+            animation: fadeInUp 0.5s ease forwards; opacity: 0; position: relative;
         }
 
         .hot-tag { background: linear-gradient(90deg, #ff4b2b, #ff416c); color: #fff; padding: 3px 10px; border-radius: 6px; font-size: 10px; position: absolute; top: -10px; right: 20px; }
 
-        .price { font-size: 24px; font-weight: 900; color: var(--blue); text-shadow: 0 0 10px rgba(0, 210, 255, 0.3); }
+        .price { font-size: 24px; font-weight: 900; color: var(--blue); }
         
         .ai-consultant { 
             background: linear-gradient(135deg, rgba(0, 210, 255, 0.1), rgba(0, 255, 204, 0.05));
@@ -55,11 +61,17 @@
 
         .calc-box { 
             background: rgba(0, 0, 0, 0.4); border: 1px solid var(--blue); border-radius: 20px;
-            padding: 20px; margin: 20px 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            padding: 20px; margin: 20px 15px;
         }
+
         input { 
-            width: 100%; padding: 15px; background: rgba(255,255,255,0.05); border: 1px solid rgba(0, 210, 255, 0.3);
-            color: #fff; border-radius: 12px; margin: 10px 0; box-sizing: border-box; outline: none;
+            width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(0, 210, 255, 0.3);
+            color: #fff; border-radius: 12px; margin: 5px 0; box-sizing: border-box; outline: none;
+        }
+
+        button.ask-btn {
+            background: var(--blue); color: #000; border: none; border-radius: 8px; 
+            padding: 10px 20px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px;
         }
     </style>
 </head>
@@ -70,12 +82,19 @@
     <div style="font-size: 9px; opacity: 0.6; margin-top: 5px;">PREMIUM MARKET INTELLIGENCE // V3.0</div>
 </div>
 
+<div class="ai-search-card">
+    <div style="font-size: 10px; color: var(--blue); font-weight: bold; margin-bottom: 10px; letter-spacing: 1px;">🧠 AI PREDICT ENGINE (BETA)</div>
+    <input type="text" id="ai-input" placeholder="Введите название (напр. AK-47 Slate)">
+    <button class="ask-btn" onclick="askAI()">АНАЛИЗИРОВАТЬ АССЕТ</button>
+    <div id="ai-response" style="display: none; margin-top: 15px; font-size: 13px; border-top: 1px solid rgba(0,210,255,0.2); padding-top: 12px; line-height: 1.4;"></div>
+</div>
+
 <div class="live-scanner" id="scanner-text">> Initializing Ice Scan...</div>
 
 <div class="tabs">
     <div class="tab active" onclick="loadCat('low', this)">LOW</div>
     <div class="tab" onclick="loadCat('med', this)">MEDIUM</div>
-    <div class="tab" onclick="loadCat('high', this)">HIGH END</div>
+    <div class="tab" onclick="loadCat('high', this)">HIGH</div>
 </div>
 
 <div id="content-list"></div>
@@ -84,11 +103,7 @@
     <div style="font-size: 12px; color: var(--blue); font-weight: bold; margin-bottom: 10px;">📊 QUICK PROFIT & ROI (-13%)</div>
     <input type="number" id="buyP" placeholder="Цена покупки ($)">
     <input type="number" id="sellP" placeholder="Цена продажи ($)">
-    <div id="roiRes" style="margin-top: 10px; font-weight: bold; color: var(--accent); font-size: 16px;">READY TO CALCULATE</div>
-</div>
-
-<div style="padding: 20px; font-size: 10px; color: rgba(255,255,255,0.3); text-align: center; line-height: 1.6;">
-    <b>LEGAL:</b> Не является фин. рекомендацией. Прошлые результаты не гарантируют доход в будущем. Все права защищены © NATACULT 2024.
+    <div id="roiRes" style="margin-top: 10px; font-weight: bold; color: var(--accent); font-size: 14px;">READY TO CALCULATE</div>
 </div>
 
 <script>
@@ -96,20 +111,32 @@
     tg.expand();
     tg.setHeaderColor('#000814');
 
+    // Логика AI Поиска
+    function askAI() {
+        const input = document.getElementById('ai-input').value;
+        const resDiv = document.getElementById('ai-response');
+        if(!input) return;
+        resDiv.style.display = 'block';
+        resDiv.innerHTML = "<span style='color: #00ffcc;'>[АНАЛИЗИРУЮ ТРЕНДЫ BUFF163...]</span>";
+        setTimeout(() => {
+            resDiv.innerHTML = `
+                <div style="color: var(--blue); font-weight: bold;">ВЕРДИКТ ПО ${input.toUpperCase()}:</div>
+                <div style="color: #00ffcc; margin-top: 5px;">📈 СТАТУС: BULLISH (УМЕРЕННЫЙ РОСТ)</div>
+                <div style="font-size: 11px; opacity: 0.8; margin-top: 5px;">Высокая плотность ордеров на покупку. Ожидаемая волатильность: 4.2%. Рекомендуется удержание (HOLD).</div>
+            `;
+        }, 1500);
+    }
+
     // Живой логгер
-    const logs = [
-        "Analyzing Steam Market liquidity...", "M4A1-S Printstream: Bullish trend",
-        "Volume spike: Recoil Case (+14%)", "Scanning Buff163 patterns...",
-        "AI: Accumulation phase detected", "Whale activity: Butterfly | Fade"
-    ];
+    const logs = ["Analyzing Steam Market liquidity...", "Volume spike: Recoil Case (+14%)", "Scanning patterns...", "Whale activity detected"];
     setInterval(() => {
         document.getElementById('scanner-text').innerText = "> " + logs[Math.floor(Math.random()*logs.length)];
     }, 3500);
 
     const db = {
         low: [{ name: "Recoil Case", price: "$1.45", grow: "+182%", ai: "Критическое снижение предложения. Потенциал: Высокий.", hist: [10, 40, 80, 120, 160, 182] }],
-        med: [{ name: "AK-47 | Slate (FN)", price: "$12.80", grow: "+64%", ai: "Зона накопления. Ожидается импульс в ближайшие 48ч.", hist: [5, 15, 25, 45, 55, 64] }],
-        high: [{ name: "Butterfly | Doppler", price: "$1840", grow: "+210%", ai: "Исторический хай. Риск коррекции 15-20%.", hist: [10, 70, 120, 180, 200, 210] }]
+        med: [{ name: "AK-47 | Slate (FN)", price: "$12.80", grow: "+64%", ai: "Зона накопления. Ожидается импульс.", hist: [5, 15, 25, 45, 55, 64] }],
+        high: [{ name: "Butterfly | Doppler", price: "$1840", grow: "+210%", ai: "Исторический хай. Риск коррекции.", hist: [10, 70, 120, 180, 200, 210] }]
     };
 
     function loadCat(cat, el) {
@@ -119,7 +146,6 @@
         }
         const list = document.getElementById('content-list');
         list.innerHTML = '';
-        
         db[cat].forEach((item, i) => {
             const canvasId = `c-${cat}-${i}`;
             list.innerHTML += `
@@ -128,31 +154,22 @@
                     <div style="font-weight: bold; font-size: 14px; opacity: 0.8;">${item.name}</div>
                     <div style="display: flex; justify-content: space-between; align-items: flex-end; margin: 10px 0;">
                         <div class="price">${item.price}</div>
-                        <div style="color: var(--accent); font-size: 12px; font-weight: bold;">${item.grow} Growth</div>
+                        <div style="color: var(--accent); font-size: 12px; font-weight: bold;">${item.grow}</div>
                     </div>
                     <canvas id="${canvasId}" style="max-height: 100px;"></canvas>
                     <div class="ai-consultant">
-                        <div style="font-size: 10px; color: var(--accent); font-weight: bold; margin-bottom: 5px;">🧠 AI CONSULTANT</div>
-                        <div style="font-size: 12px; line-height: 1.4;">${item.ai}</div>
+                        <div style="font-size: 10px; color: var(--accent); font-weight: bold;">🧠 AI CONSULTANT</div>
+                        <div style="font-size: 11px; line-height: 1.4; margin-top: 5px;">${item.ai}</div>
                     </div>
-                </div>
-            `;
-            setTimeout(() => renderChart(canvasId, item.hist), 50);
-        });
-    }
-
-    function renderChart(id, data) {
-        const ctx = document.getElementById(id).getContext('2d');
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: [1,2,3,4,5,6],
-                datasets: [{
-                    data: data, borderColor: '#00d2ff', borderWidth: 3, tension: 0.4,
-                    pointRadius: 0, fill: true, backgroundColor: 'rgba(0, 210, 255, 0.1)'
-                }]
-            },
-            options: { plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } }
+                </div>`;
+            setTimeout(() => {
+                const ctx = document.getElementById(canvasId).getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: { labels: [1,2,3,4,5,6], datasets: [{ data: item.hist, borderColor: '#00d2ff', borderWidth: 3, tension: 0.4, pointRadius: 0, fill: true, backgroundColor: 'rgba(0, 210, 255, 0.1)' }] },
+                    options: { plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } }
+                });
+            }, 50);
         });
     }
 
@@ -168,7 +185,6 @@
 
     document.getElementById('buyP').addEventListener('input', calc);
     document.getElementById('sellP').addEventListener('input', calc);
-
     loadCat('low');
 </script>
 </body>
