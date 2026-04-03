@@ -3,139 +3,175 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NATACULT OS V4.0</title>
+    <title>NATACULT PRO TERMINAL</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root { --blue: #00d2ff; --dark: #000814; --glass: rgba(255, 255, 255, 0.07); --accent: #00ffcc; --gold: #ffd700; }
-        body { background: radial-gradient(circle at top right, #001d3d 0%, var(--dark) 100%); color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
+        :root { --blue: #00d2ff; --dark: #000814; --glass: rgba(255, 255, 255, 0.07); --accent: #00ffcc; --red: #ff4b2b; }
         
-        .header { padding: 20px; text-align: center; border-bottom: 1px solid rgba(0, 210, 255, 0.2); backdrop-filter: blur(10px); sticky; top: 0; z-index: 100; }
+        body { 
+            background: radial-gradient(circle at top right, #001d3d 0%, var(--dark) 100%); 
+            color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; overflow: hidden;
+        }
+
+        /* Навигация */
+        .screen { display: none; height: 100vh; overflow-y: auto; padding-bottom: 100px; box-sizing: border-box; }
+        .screen.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .nav-bar { 
+            position: fixed; bottom: 0; width: 100%; background: rgba(0, 8, 20, 0.95); 
+            backdrop-filter: blur(20px); display: flex; border-top: 1px solid rgba(0, 210, 255, 0.2); z-index: 1000; 
+        }
+        .nav-item { flex: 1; text-align: center; padding: 12px 0; font-size: 10px; color: #668ba4; cursor: pointer; transition: 0.3s; }
+        .nav-item.active { color: var(--blue); text-shadow: 0 0 10px var(--blue); }
+        .nav-item span { display: block; font-size: 20px; margin-bottom: 2px; }
+
+        /* Элементы UI */
+        .card { background: var(--glass); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 18px; margin: 15px; backdrop-filter: blur(10px); position: relative; }
+        .status-badge { display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: bold; margin-bottom: 8px; text-transform: uppercase; }
+        .up { background: rgba(0, 255, 204, 0.15); color: var(--accent); }
         
-        /* RANK SYSTEM */
-        .rank-card { background: linear-gradient(90deg, rgba(0,210,255,0.1), rgba(255,215,0,0.1)); border: 1px solid var(--gold); margin: 15px; padding: 10px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; }
-        .rank-name { color: var(--gold); font-weight: bold; font-size: 12px; text-transform: uppercase; }
+        .tabs { display: flex; gap: 8px; padding: 0 15px; margin: 10px 0; }
+        .tab { flex: 1; padding: 10px; background: var(--glass); border: 1px solid rgba(0, 210, 255, 0.2); border-radius: 10px; color: var(--blue); font-size: 10px; font-weight: bold; text-align: center; }
+        .tab.active { background: var(--blue); color: #000; box-shadow: 0 0 15px var(--blue); }
 
-        .update-timer { font-size: 9px; color: var(--accent); text-align: center; margin-bottom: 10px; opacity: 0.8; }
-
-        .ai-search-card { border: 1px solid var(--blue); background: rgba(0,210,255,0.05); margin: 15px; border-radius: 15px; padding: 15px; }
-        .tabs { display: flex; gap: 8px; padding: 0 15px; margin-bottom: 20px; }
-        .tab { flex: 1; padding: 12px; background: var(--glass); border: 1px solid rgba(0, 210, 255, 0.2); border-radius: 12px; color: var(--blue); font-size: 10px; font-weight: 800; text-align: center; }
-        .tab.active { background: var(--blue); color: #000; box-shadow: 0 0 20px var(--blue); }
-
-        .asset-card { background: var(--glass); border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(15px); border-radius: 20px; padding: 20px; margin: 0 15px 15px 15px; position: relative; }
-        .price { font-size: 24px; font-weight: 900; color: var(--blue); }
+        input { width: 100%; padding: 14px; background: rgba(0,0,0,0.4); border: 1px solid rgba(0, 210, 255, 0.3); color: #fff; border-radius: 12px; margin: 10px 0; box-sizing: border-box; outline: none; }
+        button { background: var(--blue); color: #000; border: none; border-radius: 12px; padding: 14px; font-weight: 900; width: 100%; cursor: pointer; letter-spacing: 1px; }
         
-        .news-ticker { background: rgba(255,255,255,0.03); border: 1px dashed rgba(255,255,255,0.2); margin: 15px; padding: 10px; font-size: 11px; color: #aaa; overflow: hidden; white-space: nowrap; }
-
-        input { width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(0, 210, 255, 0.3); color: #fff; border-radius: 12px; margin: 5px 0; box-sizing: border-box; }
-        button { background: var(--blue); color: #000; border: none; border-radius: 8px; padding: 10px; font-weight: bold; width: 100%; cursor: pointer; }
+        .price { font-size: 22px; font-weight: 900; color: var(--blue); }
+        .ai-box { border-left: 3px solid var(--blue); padding-left: 12px; margin-top: 15px; font-size: 13px; line-height: 1.4; background: rgba(0,210,255,0.03); padding: 10px; border-radius: 0 10px 10px 0; }
     </style>
 </head>
 <body>
 
-<div class="header">
-    <div style="font-size: 20px; font-weight: 900; letter-spacing: 2px;">NATACULT <span style="color:var(--blue)">OS</span></div>
-</div>
+    <div id="screen-market" class="screen active">
+        <div style="padding: 20px 20px 0 20px; text-align: left;">
+            <div style="font-size: 24px; font-weight: 900;">TERMINAL <span style="color:var(--blue)">PRO</span></div>
+            <div id="update-timer" style="font-size: 10px; color: var(--accent); margin-top: 5px;">NEXT UPDATE: 29:59</div>
+        </div>
+        
+        <div class="tabs">
+            <div class="tab active" onclick="loadCat('low', this)">LOW</div>
+            <div class="tab" onclick="loadCat('med', this)">MEDIUM</div>
+            <div class="tab" onclick="loadCat('high', this)">HIGH END</div>
+        </div>
+        
+        <div id="market-list"></div>
+    </div>
 
-<div class="rank-card">
-    <span>USER RANK: <span class="rank-name" id="user-rank">PLANKTON 🐟</span></span>
-    <span style="font-size: 10px; opacity: 0.7;">VOL: $0.00</span>
-</div>
+    <div id="screen-ai" class="screen">
+        <div class="card">
+            <div style="font-size: 40px; margin-bottom: 10px;">🧠</div>
+            <h3>AI Predict Engine</h3>
+            <p style="font-size: 12px; opacity: 0.7;">Введите название скина. Нейросеть проанализирует историю продаж и текущий хайп.</p>
+            <input type="text" id="ai-query" placeholder="Напр: AK-47 Nightwish">
+            <button onclick="runAI()">ЗАПУСТИТЬ СКАНИРОВАНИЕ</button>
+            <div id="ai-result-box" style="display:none;" class="ai-box"></div>
+        </div>
+    </div>
 
-<div class="update-timer" id="timer-label">NEXT MARKET UPDATE: 29:59</div>
+    <div id="screen-news" class="screen">
+        <div style="padding: 20px;">
+            <h3>📰 News Feed</h3>
+            <div id="news-list"></div>
+        </div>
+    </div>
 
-<div class="news-ticker" id="news-line">NEWS: Аналитики ожидают выход новой операции в CS2...</div>
+    <div id="screen-status" class="screen">
+        <div class="card" style="text-align: center; padding: 40px 20px;">
+            <div style="font-size: 50px; margin-bottom: 15px;">📊</div>
+            <div class="status-badge up" style="font-size: 14px; padding: 8px 20px;">MARKET STATUS: BULLISH</div>
+            <h2 style="margin: 10px 0;">STRONG UP</h2>
+            <div style="opacity: 0.6; font-size: 12px; margin-bottom: 30px;">Sentiment: Extreme Greed (78/100)</div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px;">
+                    <div style="font-size: 10px; opacity: 0.5;">VOLUME (24H)</div>
+                    <div style="font-size: 18px; font-weight: bold; color: var(--blue);">$18.4M</div>
+                </div>
+                <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px;">
+                    <div style="font-size: 10px; opacity: 0.5;">TRADES</div>
+                    <div style="font-size: 18px; font-weight: bold; color: var(--accent);">+12.4%</div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<div class="ai-search-card">
-    <div style="font-size: 10px; color: var(--blue); font-weight: bold; margin-bottom: 10px;">🧠 AI PREDICT ENGINE (BETA)</div>
-    <input type="text" id="ai-input" placeholder="Напр: M4A4 Howl">
-    <button onclick="askAI()" style="margin-top:5px;">АНАЛИЗ</button>
-    <div id="ai-response" style="display: none; margin-top: 15px; font-size: 12px; border-top: 1px solid rgba(0,210,255,0.2); padding-top: 10px;"></div>
-</div>
-
-<div class="tabs">
-    <div class="tab active" onclick="loadCat('low', this)">LOW</div>
-    <div class="tab" onclick="loadCat('med', this)">MEDIUM</div>
-    <div class="tab" onclick="loadCat('high', this)">HIGH</div>
-</div>
-
-<div id="content-list"></div>
+    <div class="nav-bar">
+        <div class="nav-item active" onclick="showScreen('market', this)"><span>📊</span>Market</div>
+        <div class="nav-item" onclick="showScreen('ai', this)"><span>🧠</span>AI Scan</div>
+        <div class="nav-item" onclick="showScreen('news', this)"><span>📰</span>News</div>
+        <div class="nav-item" onclick="showScreen('status', this)"><span>📈</span>Status</div>
+    </div>
 
 <script>
     const tg = window.Telegram.WebApp;
     tg.expand();
 
-    // 1. СИСТЕМА ОБНОВЛЕНИЯ (КАЖДЫЕ 30 МИНУТ)
-    let timeLeft = 1800; // 30 минут в секундах
-    function startTimer() {
-        setInterval(() => {
-            if (timeLeft <= 0) {
-                timeLeft = 1800;
-                refreshMarketData(); // Обновляем цены
-            }
-            timeLeft--;
-            const mins = Math.floor(timeLeft / 60);
-            const secs = timeLeft % 60;
-            document.getElementById('timer-label').innerText = `NEXT MARKET UPDATE: ${mins}:${secs < 10 ? '0'+secs : secs}`;
-        }, 1000);
+    // 1. ПЕРЕКЛЮЧЕНИЕ ЭКРАНОВ
+    function showScreen(id, el) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById('screen-' + id).classList.add('active');
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        el.classList.add('active');
     }
 
-    function refreshMarketData() {
-        // Имитация изменения цен на 1-3% каждые 30 минут
-        for (let cat in db) {
-            db[cat].forEach(item => {
-                let change = (Math.random() * 2 - 1).toFixed(2);
-                let currentPrice = parseFloat(item.price.replace('$', ''));
-                item.price = `$${(currentPrice + (currentPrice * (change/100))).toFixed(2)}`;
-            });
-        }
-        loadCat(activeCat); // Перерисовать текущую категорию
-    }
-
-    let activeCat = 'low';
+    // 2. БАЗА ДАННЫХ ТОВАРОВ
     const db = {
-        low: [{ name: "Recoil Case", price: "$1.45", grow: "+182%", hist: [10, 40, 80, 120, 160, 182] }],
-        med: [{ name: "AK-47 | Slate (FN)", price: "$12.80", grow: "+64%", hist: [5, 15, 25, 45, 55, 64] }],
-        high: [{ name: "Butterfly | Doppler", price: "$1840", grow: "+210%", hist: [10, 70, 120, 180, 200, 210] }]
+        low: [
+            { name: "Recoil Case", price: "$1.45", grow: "+3.2%", hist: [1.2, 1.3, 1.45, 1.4, 1.45] },
+            { name: "Fracture Case", price: "$0.85", grow: "+1.5%", hist: [0.7, 0.8, 0.82, 0.85, 0.85] }
+        ],
+        med: [
+            { name: "AK-47 | Slate (FN)", price: "$12.80", grow: "+4.1%", hist: [10, 11, 12.8, 12.5, 12.8] },
+            { name: "AWP | Atheris (MW)", price: "$9.40", grow: "-0.8%", hist: [10, 9.8, 9.5, 9.4, 9.4] }
+        ],
+        high: [
+            { name: "Butterfly | Doppler", price: "$1840", grow: "+12.4%", hist: [1500, 1650, 1800, 1840, 1840] }
+        ]
     };
 
     function loadCat(cat, el) {
-        activeCat = cat;
         if(el) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             el.classList.add('active');
         }
-        const list = document.getElementById('content-list');
+        const list = document.getElementById('market-list');
         list.innerHTML = '';
         db[cat].forEach((item, i) => {
-            const canvasId = `c-${cat}-${i}`;
+            const canvasId = `chart-${cat}-${i}`;
             list.innerHTML += `
-                <div class="asset-card">
-                    <div style="font-weight: bold; font-size: 14px;">${item.name}</div>
-                    <div class="price">${item.price}</div>
-                    <canvas id="${canvasId}" style="max-height: 100px; margin-top:10px;"></canvas>
-                </div>`;
-            setTimeout(() => {
-                const ctx = document.getElementById(canvasId).getContext('2d');
-                new Chart(ctx, {
-                    type: 'line',
-                    data: { labels: [1,2,3,4,5,6], datasets: [{ data: item.hist, borderColor: '#00d2ff', borderWidth: 3, tension: 0.4, pointRadius: 0, fill: true, backgroundColor: 'rgba(0, 210, 255, 0.1)' }] },
-                    options: { plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } }
-                });
-            }, 50);
+                <div class="card">
+                    <div class="status-badge up">HOT SIGNAL</div>
+                    <div style="font-weight: bold;">${item.name}</div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                        <div class="price">${item.price}</div>
+                        <div style="color: var(--accent); font-size: 12px;">${item.grow} (24h)</div>
+                    </div>
+                    <canvas id="${canvasId}" style="max-height: 80px; margin-top:15px;"></canvas>
+                </div>
+            `;
+            setTimeout(() => renderChart(canvasId, item.hist), 50);
         });
     }
 
-    function askAI() {
-        const res = document.getElementById('ai-response');
-        res.style.display = 'block';
-        res.innerHTML = "ANALYZING PATTERNS...";
-        setTimeout(() => { res.innerHTML = `<span style="color:var(--accent)">ВЕРДИКТ: BULLISH.</span> Объемы Buff163 подтверждают закуп.`; }, 1200);
+    function renderChart(id, data) {
+        const ctx = document.getElementById(id).getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [1,2,3,4,5],
+                datasets: [{
+                    data: data, borderColor: '#00d2ff', borderWidth: 2, tension: 0.4, pointRadius: 0, fill: true,
+                    backgroundColor: 'rgba(0, 210, 255, 0.05)'
+                }]
+            },
+            options: { plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } }
+        });
     }
 
-    startTimer();
-    loadCat('low');
-</script>
-</body>
-</html>
+    // 3. AI АНАЛИЗ (ОТКАЗОУСТОЙЧИВЫЙ)
+    function runAI() {
+        const q = document.getElementById('ai-query').value || "Unknown Asset";
+        const res = document.getElementById('ai
