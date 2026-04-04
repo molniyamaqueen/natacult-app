@@ -15,7 +15,6 @@
         
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* Центровка экрана выбора языка */
         #screen-lang {
             display: none;
             position: fixed;
@@ -111,6 +110,7 @@
 <script>
     const tg = window.Telegram.WebApp;
     tg.expand();
+    tg.ready();
 
     const translations = {
         ru: { market: "МАРКЕТ", calc: "КАЛЬКУЛЯТОР", news: "НОВОСТИ", buy: "ЗАКУП", sell: "ПРОДАЖА", profit: "ПРИБЫЛЬ", liq_check: "ЛИКВИДНОСТЬ", lots: "Лоты", high: "ВЫСОКАЯ 💎", stable: "СТАБИЛЬНАЯ ✅", coll: "РЕДКАЯ ⚠️", lang_subtitle: "КВАНТОВЫЙ ТЕРМИНАЛ", live_feed: "ПРЯМОЙ ЭФИР РЫНКА", calc_title: "ROI КАЛЬКУЛЯТОР" },
@@ -129,22 +129,20 @@
     }
 
     function setLang(lang) {
-    currentLang = lang;
-    localStorage.setItem('ui_lang', lang);
-    
-    // ПРИНУДИТЕЛЬНО обновляем все тексты сразу после выбора
-    applyLang(); 
-    
-    const langScreen = document.getElementById('screen-lang');
-    langScreen.style.opacity = '0';
-    
-    setTimeout(() => {
-        langScreen.classList.remove('active');
-        langScreen.style.display = 'none';
-        document.getElementById('main-nav').style.display = 'flex';
-        showScreen('market');
-        startFeeds(); // Запускаем маркет и новости только после выбора языка
-    }, 400);
+        currentLang = lang;
+        localStorage.setItem('ui_lang', lang);
+        applyLang(); 
+        
+        const langScreen = document.getElementById('screen-lang');
+        langScreen.style.opacity = '0';
+        
+        setTimeout(() => {
+            langScreen.classList.remove('active');
+            langScreen.style.display = 'none';
+            document.getElementById('main-nav').style.display = 'flex';
+            showScreen('market');
+            startFeeds();
+        }, 400);
     }
 
     function showScreen(id, el) {
@@ -183,6 +181,7 @@
 
     function updateMarket() {
         const list = document.getElementById('market-list');
+        if (!list) return;
         const T = translations[currentLang] || translations.en;
         list.innerHTML = skins.map(s => {
             const liq = s.vol > 300 ? {t: T.high, c: "#00ffcc"} : s.vol > 50 ? {t: T.stable, c: "#ffa500"} : {t: T.coll, c: "#ff4b2b"};
@@ -207,20 +206,29 @@
         const T = translations[currentLang] || translations.en;
         const net = (sell * 0.85) - buy;
         const roi = buy > 0 ? (net / buy * 100).toFixed(1) : 0;
-        document.getElementById('calc-result').innerHTML = `${T.profit}: $${net.toFixed(2)} (${roi}%)`;
+        const color = net >= 0 ? 'var(--accent)' : 'var(--red)';
+        const resBox = document.getElementById('calc-result');
+        resBox.style.color = color;
+        resBox.style.borderColor = color;
+        resBox.innerHTML = `${T.profit}: $${net.toFixed(2)} (${roi}%)`;
     }
 
     function addNews() {
-        const activeLang = localStorage.getItem('ui_lang') || currentLang || 'en';
-        const arr = news[activeLang] || news.en;
-            ru: ["Valve обновили политику Buff163", "Крупный закуп скинов M4A1-S", "Операция ожидается в июне"],
-            ua: ["Valve оновили політику Buff163", "Великий закуп скінів M4A1-S", "Операція очікується в червні"],
-            en: ["Valve updated Buff163 policy", "Massive M4A1-S skins buy-out", "New operation expected in June"]
+        const list = document.getElementById('news-list');
+        if (!list) return;
+
+        const newsData = {
+            ru: ["Valve обновили политику Buff163", "Крупный закуп скинов M4A1-S", "Операция ожидается в июне", "Цены на кейсы стабильно растут"],
+            ua: ["Valve оновили політику Buff163", "Великий закуп скінів M4A1-S", "Операція очікується в червні", "Ціни на кейси стабільно зростають"],
+            en: ["Valve updated Buff163 policy", "Massive M4A1-S skins buy-out", "New operation expected in June", "Case prices are growing steadily"]
         };
-        const arr = news[currentLang] || news.en;
-        const txt = arr[Math.floor(Math.random()*arr.length)];
-        list.insertAdjacentHTML('afterbegin', `<div class="card" style="font-size:13px;">${txt}</div>`);
-        if(list.children.length > 4) list.lastChild.remove();
+
+        const activeLang = localStorage.getItem('ui_lang') || currentLang || 'en';
+        const arr = newsData[activeLang] || newsData.en;
+        const txt = arr[Math.floor(Math.random() * arr.length)];
+        
+        list.insertAdjacentHTML('afterbegin', `<div class="card" style="font-size:13px; border-left: 2px solid var(--blue);">${txt}</div>`);
+        if (list.children.length > 4) list.lastChild.remove();
     }
 
     // Запуск
