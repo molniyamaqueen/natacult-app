@@ -3,212 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <title>PRIME NODE ULTIMA</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root { --blue: #00d2ff; --dark: #000814; --glass: rgba(255, 255, 255, 0.05); --accent: #00ffcc; --red: #ff4b2b; }
-        body { background: #000814; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; overflow: hidden; }
+        body { background: #000814; color: #fff; font-family: 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; overflow: hidden; user-select: none; -webkit-user-select: none; }
+        
         .screen { display: none; height: 100vh; overflow-y: auto; padding-bottom: 100px; box-sizing: border-box; }
-        .screen.active { display: block; animation: fadeIn 0.4s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+        .screen.active { display: block; animation: fadeIn 0.3s ease; }
+        
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
+        /* Центровка экрана выбора языка */
         #screen-lang {
+            display: none;
             position: fixed;
             inset: 0;
             z-index: 2000;
-            box-sizing: border-box;
             padding: 20px;
             justify-content: center;
             align-items: center;
             flex-direction: column;
+            text-align: center;
         }
-        #screen-lang.screen.active {
-            display: flex !important;
-            animation: none;
-        }
+        #screen-lang.active { display: flex; }
 
         .lang-btn {
-            transition: transform 0.25s ease, background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
-            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+            width: 100%;
+            max-width: 280px;
+            padding: 18px;
+            margin: 8px 0;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(0,210,255,0.2);
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
-        .lang-btn:hover {
-            background: rgba(255, 255, 255, 0.07) !important;
-            border-color: rgba(0, 210, 255, 0.55) !important;
-            box-shadow: 0 0 28px rgba(0, 210, 255, 0.35), 0 0 56px rgba(0, 210, 255, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.12);
-        }
-        .lang-btn:active {
-            transform: scale(0.95);
-            background: rgba(0, 210, 255, 0.1) !important;
-            border-color: var(--blue) !important;
-            box-shadow: 0 0 20px rgba(0, 210, 255, 0.45);
-        }
+        .lang-btn:active { transform: scale(0.96); background: rgba(0,210,255,0.1); border-color: var(--blue); }
 
-        .nav-bar { position: fixed; bottom: 0; width: 100%; background: rgba(0, 8, 20, 0.95); backdrop-filter: blur(20px); display: flex; border-top: 1px solid rgba(0, 210, 255, 0.1); z-index: 1000; }
-        .nav-item { flex: 1; text-align: center; padding: 15px 0; font-size: 10px; color: #668ba4; cursor: pointer; transition: 0.2s; }
-        .nav-item.active { color: var(--blue); text-shadow: 0 0 10px var(--blue); }
-        .nav-item .nav-icon { display: block; font-size: 20px; }
+        .nav-bar { position: fixed; bottom: 0; width: 100%; background: rgba(0, 8, 20, 0.9); backdrop-filter: blur(15px); display: flex; border-top: 1px solid rgba(0, 210, 255, 0.1); z-index: 1000; }
+        .nav-item { flex: 1; text-align: center; padding: 12px 0; font-size: 10px; color: #668ba4; transition: 0.2s; }
+        .nav-item.active { color: var(--blue); }
+        .nav-icon { display: block; font-size: 20px; margin-bottom: 2px; }
 
-        .card { background: var(--glass); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 20px; padding: 18px; margin: 15px; backdrop-filter: blur(10px); }
-        .price { font-size: 24px; font-weight: 900; color: var(--blue); }
-
-        .calc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
-        input { width: 100%; padding: 12px; background: #000; border: 1px solid rgba(0, 210, 255, 0.2); color: #fff; border-radius: 12px; outline: none; box-sizing: border-box; }
-        .res-box { background: rgba(0, 255, 204, 0.05); border: 1px solid var(--accent); padding: 15px; border-radius: 12px; margin-top: 15px; text-align: center; color: var(--accent); font-weight: bold; }
+        .card { background: var(--glass); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 18px; padding: 15px; margin: 12px; backdrop-filter: blur(10px); }
+        .price { font-size: 22px; font-weight: 900; color: var(--blue); }
+        
+        input { width: 100%; padding: 12px; background: #000; border: 1px solid rgba(0, 210, 255, 0.2); color: #fff; border-radius: 10px; outline: none; box-sizing: border-box; font-size: 16px; }
+        .res-box { background: rgba(0, 255, 204, 0.05); border: 1px solid var(--accent); padding: 12px; border-radius: 10px; margin-top: 15px; text-align: center; color: var(--accent); font-size: 14px; }
     </style>
 </head>
 <body>
 
-    <div id="screen-lang" class="screen active" style="background: radial-gradient(circle at center, #002b5b 0%, #000814 100%);">
-        <div style="margin-bottom: 40px; text-align: center;">
-            <div style="font-size: 50px; filter: drop-shadow(0 0 15px var(--blue));">🔱</div>
-            <h1 style="letter-spacing: 5px; font-weight: 900; margin-top: 10px; color: #e8f4ff;">PRIME <span style="color:var(--blue)">NODE</span></h1>
-            <p data-t="lang_subtitle" style="font-size: 10px; opacity: 0.5; letter-spacing: 2px; color: #a8c4e0;">NEURAL QUANTUM TERMINAL</p>
+    <div id="screen-lang" class="screen" style="background: radial-gradient(circle at center, #001a33 0%, #000814 100%);">
+        <div style="margin-bottom: 30px;">
+            <div style="font-size: 45px;">🔱</div>
+            <h1 style="letter-spacing: 3px; margin: 5px 0;">PRIME <span style="color:var(--blue)">NODE</span></h1>
+            <p data-t="lang_subtitle" style="font-size: 9px; opacity: 0.5; letter-spacing: 1px;">NEURAL QUANTUM TERMINAL</p>
         </div>
-        <p data-t="choose_lang" style="margin-bottom: 20px; font-size: 12px; opacity: 0.7; letter-spacing: 1px; color: #b8d4f0;">CHOOSE INTERFACE LANGUAGE</p>
-        <div style="width: 80%; max-width: 360px; display: flex; flex-direction: column; gap: 15px;">
-            <div class="lang-btn" onclick="setLang('ru')" style="display: flex; align-items: center; justify-content: space-between; padding: 20px; background: rgba(255,255,255,0.05); border: 1px solid rgba(0,210,255,0.25); border-radius: 20px; backdrop-filter: blur(16px) saturate(1.35); -webkit-backdrop-filter: blur(16px) saturate(1.35); cursor: pointer;">
-                <div style="display: flex; align-items: center; gap: 15px;">
-                    <span style="font-size: 24px;">🇷🇺</span>
-                    <span data-t="lang_ru" style="font-weight: bold; letter-spacing: 1px; color: #e8f4ff;">RUSSIAN</span>
-                </div>
-                <span style="color: var(--blue); text-shadow: 0 0 12px rgba(0,210,255,0.8);">→</span>
-            </div>
-            <div class="lang-btn" onclick="setLang('en')" style="display: flex; align-items: center; justify-content: space-between; padding: 20px; background: rgba(255,255,255,0.05); border: 1px solid rgba(0,210,255,0.25); border-radius: 20px; backdrop-filter: blur(16px) saturate(1.35); -webkit-backdrop-filter: blur(16px) saturate(1.35); cursor: pointer;">
-                <div style="display: flex; align-items: center; gap: 15px;">
-                    <span style="font-size: 24px;">🇺🇸</span>
-                    <span data-t="lang_en" style="font-weight: bold; letter-spacing: 1px; color: #e8f4ff;">ENGLISH</span>
-                </div>
-                <span style="color: var(--blue); text-shadow: 0 0 12px rgba(0,210,255,0.8);">→</span>
-            </div>
-        </div>
-        <div data-t="secure_footer" style="position: absolute; bottom: 30px; font-size: 9px; opacity: 0.3; color: #7aa8cc;">SECURE CONNECTION ESTABLISHED</div>
+        <div class="lang-btn" onclick="setLang('ru')"><span>🇷🇺 РУССКИЙ</span><span>→</span></div>
+        <div class="lang-btn" onclick="setLang('ua')"><span>🇺🇦 УКРАЇНСЬКА</span><span>→</span></div>
+        <div class="lang-btn" onclick="setLang('en')"><span>🇺🇸 ENGLISH</span><span>→</span></div>
     </div>
 
     <div id="screen-market" class="screen">
-        <div style="padding: 25px 20px 10px;">
-            <div style="font-size: 22px; font-weight: 900; letter-spacing: 2px;">PRIME <span style="color:var(--blue)">NODE</span></div>
-            <div data-t="live_feed" style="font-size: 10px; color: var(--accent); margin-top: 5px;">LIVE MARKET FEED</div>
+        <div style="padding: 20px;">
+            <div style="font-size: 18px; font-weight: 900;">PRIME <span style="color:var(--blue)">NODE</span></div>
+            <div data-t="live_feed" style="font-size: 9px; color: var(--accent);">LIVE MARKET FEED</div>
         </div>
         <div id="market-list"></div>
     </div>
 
     <div id="screen-calc" class="screen">
         <div class="card">
-            <h3 style="margin-top:0">🧮 <span data-t="calc_title">ROI CALCULATOR</span></h3>
-            <p data-t="calc_hint" style="font-size:12px; opacity:0.6">Calculate net profit including platform fee (15%).</p>
-            <div class="calc-grid">
+            <h3 style="margin-top:0"><span data-t="calc_title">ROI CALCULATOR</span></h3>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                 <div>
-                    <label style="font-size:10px"><span data-t="buy">BUY PRICE</span> ($)</label>
+                    <label style="font-size:10px; opacity: 0.6;"><span data-t="buy">BUY</span> ($)</label>
                     <input type="number" id="buy-price" placeholder="0.00" oninput="calcROI()">
                 </div>
                 <div>
-                    <label style="font-size:10px"><span data-t="sell">SELL PRICE</span> ($)</label>
+                    <label style="font-size:10px; opacity: 0.6;"><span data-t="sell">SELL</span> ($)</label>
                     <input type="number" id="sell-price" placeholder="0.00" oninput="calcROI()">
                 </div>
             </div>
-            <div id="calc-result" class="res-box"><span data-t="profit">PROFIT</span>: $0.00 (0%)</div>
+            <div id="calc-result" class="res-box">ROI: 0%</div>
         </div>
     </div>
 
     <div id="screen-news" class="screen">
         <div style="padding: 20px;">
-            <h3>📰 <span data-t="news">News</span></h3>
+            <h3 data-t="news">NEWS</h3>
             <div id="news-list"></div>
         </div>
     </div>
 
-    <nav class="nav-bar">
+    <nav class="nav-bar" id="main-nav" style="display: none;">
         <div class="nav-item active" onclick="showScreen('market', this)"><span class="nav-icon">📊</span><span data-t="market">Market</span></div>
         <div class="nav-item" onclick="showScreen('calc', this)"><span class="nav-icon">🧮</span><span data-t="calc">Calc</span></div>
         <div class="nav-item" onclick="showScreen('news', this)"><span class="nav-icon">📰</span><span data-t="news">News</span></div>
     </nav>
 
 <script>
-    (function () {
-        try {
-            const params = new URLSearchParams(location.search);
-            if (params.get('reset') === '1') {
-                localStorage.removeItem('ui_lang');
-                params.delete('reset');
-                const q = params.toString();
-                const base = location.href.split('?')[0];
-                history.replaceState({}, '', q ? base + '?' + q : base);
-            }
-        } catch (e) {}
-    })();
+    const tg = window.Telegram.WebApp;
+    tg.expand();
 
     const translations = {
-        ru: {
-            market: "МАРКЕТ", calc: "КАЛЬКУЛЯТОР", news: "НОВОСТИ",
-            buy: "ЗАКУП", sell: "ПРОДАЖА", profit: "ПРИБЫЛЬ",
-            liq_check: "ПРОВЕРКА ЛИКВИДНОСТИ", lots: "Лоты (24ч)",
-            high: "ВЫСОКАЯ 💎", stable: "СТАБИЛЬНАЯ ✅", coll: "КОЛЛЕКЦИОННАЯ ⚠️",
-            lang_subtitle: "НЕЙРО-КВАНТОВЫЙ ТЕРМИНАЛ",
-            choose_lang: "ВЫБЕРИТЕ ЯЗЫК ИНТЕРФЕЙСА",
-            lang_ru: "РУССКИЙ",
-            lang_en: "АНГЛИЙСКИЙ",
-            secure_footer: "ЗАЩИЩЁННОЕ СОЕДИНЕНИЕ",
-            live_feed: "ЛИВ ЛЕНТА РЫНКА",
-            calc_title: "ROI КАЛЬКУЛЯТОР",
-            calc_hint: "Рассчитай чистую прибыль с учётом комиссии площадки (15%)."
-        },
-        ua: {
-            market: "РИНОК", calc: "КАЛЬКУЛЯТОР", news: "НОВИНИ",
-            buy: "ЗАКУПІВЛЯ", sell: "ПРОДАЖ", profit: "ПРИБУТОК",
-            liq_check: "ПЕРЕВІРКА ЛІКВІДНОСТІ", lots: "Лоти (24г)",
-            high: "ВИСОКА 💎", stable: "СТАБІЛЬНА ✅", coll: "КОЛЕКЦІЙНА ⚠️",
-            lang_subtitle: "НЕЙРО-КВАНТОВИЙ ТЕРМІНАЛ",
-            choose_lang: "ОБЕРІТЬ МОВУ ІНТЕРФЕЙСУ",
-            lang_ru: "РОСІЙСЬКА",
-            lang_en: "АНГЛІЙСЬКА",
-            secure_footer: "ЗАХИЩЕНЕ З'ЄДНАННЯ",
-            live_feed: "ЛАЙВ СТРІЧКА РИНКУ",
-            calc_title: "ROI КАЛЬКУЛЯТОР",
-            calc_hint: "Розрахуй чистий прибуток з урахуванням комісії майданчика (15%)."
-        },
-        en: {
-            market: "MARKET", calc: "CALCULATOR", news: "NEWS",
-            buy: "BUY", sell: "SELL", profit: "PROFIT",
-            liq_check: "LIQUIDITY CHECK", lots: "Listings (24h)",
-            high: "HIGH 💎", stable: "STABLE ✅", coll: "COLLECTIBLE ⚠️",
-            lang_subtitle: "NEURAL QUANTUM TERMINAL",
-            choose_lang: "CHOOSE INTERFACE LANGUAGE",
-            lang_ru: "RUSSIAN",
-            lang_en: "ENGLISH",
-            secure_footer: "SECURE CONNECTION ESTABLISHED",
-            live_feed: "LIVE MARKET FEED",
-            calc_title: "ROI CALCULATOR",
-            calc_hint: "Calculate net profit including platform fee (15%)."
-        }
+        ru: { market: "МАРКЕТ", calc: "КАЛЬКУЛЯТОР", news: "НОВОСТИ", buy: "ЗАКУП", sell: "ПРОДАЖА", profit: "ПРИБЫЛЬ", liq_check: "ЛИКВИДНОСТЬ", lots: "Лоты", high: "ВЫСОКАЯ 💎", stable: "СТАБИЛЬНАЯ ✅", coll: "РЕДКАЯ ⚠️", lang_subtitle: "КВАНТОВЫЙ ТЕРМИНАЛ", live_feed: "ПРЯМОЙ ЭФИР РЫНКА", calc_title: "ROI КАЛЬКУЛЯТОР" },
+        ua: { market: "РИНОК", calc: "КАЛЬКУЛЯТОР", news: "НОВИНИ", buy: "ЗАКУП", sell: "ПРОДАЖ", profit: "ПРИБУТОК", liq_check: "ЛІКВІДНІСТЬ", lots: "Лоти", high: "ВИСОКА 💎", stable: "СТАБІЛЬНА ✅", coll: "РІДКІСНА ⚠️", lang_subtitle: "КВАНТОВИЙ ТЕРМІНАЛ", live_feed: "ПРЯМИЙ ЕФІР РИНКУ", calc_title: "ROI КАЛЬКУЛЯТОР" },
+        en: { market: "MARKET", calc: "CALCULATOR", news: "NEWS", buy: "BUY", sell: "SELL", profit: "PROFIT", liq_check: "LIQUIDITY", lots: "Lots", high: "HIGH 💎", stable: "STABLE ✅", coll: "COLLECTIBLE ⚠️", lang_subtitle: "QUANTUM TERMINAL", live_feed: "LIVE MARKET FEED", calc_title: "ROI CALCULATOR" }
     };
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const langFromUrl = urlParams.get('lang');
-    let storedLang = null;
-    try { storedLang = localStorage.getItem('ui_lang'); } catch (e) {}
-
-    let currentLang = 'en';
-    if (langFromUrl && translations[langFromUrl.toLowerCase()]) {
-        currentLang = langFromUrl.toLowerCase();
-        try { localStorage.setItem('ui_lang', currentLang); } catch (e) {}
-    } else if (storedLang && translations[storedLang]) {
-        currentLang = storedLang;
-    } else {
-        currentLang = 'en';
-    }
-
-    function getUserLang() {
-        return currentLang;
-    }
-
-    function getLiquidity(vol) {
-        const T = translations[currentLang] || translations.en;
-        if (vol > 300) return { text: T.high, color: "#00ffcc" };
-        if (vol > 50) return { text: T.stable, color: "#ffa500" };
-        return { text: T.coll, color: "#ff4b2b" };
-    }
+    let currentLang = localStorage.getItem('ui_lang') || new URLSearchParams(location.search).get('lang') || null;
 
     function applyLang() {
         const T = translations[currentLang] || translations.en;
@@ -218,70 +128,37 @@
         });
     }
 
-    applyLang();
-    window.addEventListener('load', applyLang);
-
-    const tg = window.Telegram.WebApp;
-    tg.expand();
-
-    let feedsStarted = false;
+    function setLang(lang) {
+        currentLang = lang;
+        localStorage.setItem('ui_lang', lang);
+        initApp();
+    }
 
     function showScreen(id, el) {
-        document.querySelectorAll('.screen').forEach(s => {
-            if (s.id === 'screen-lang') return;
-            s.classList.remove('active');
-        });
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById('screen-' + id).classList.add('active');
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        el.classList.add('active');
+        if(el) el.classList.add('active');
     }
 
-    function openMainApp() {
-        document.getElementById('screen-market').classList.add('active');
-        const navItems = document.querySelectorAll('.nav-item');
-        navItems.forEach(n => n.classList.remove('active'));
-        if (navItems[0]) navItems[0].classList.add('active');
-        startFeeds();
-        applyLang();
-        calcROI();
-    }
-
-    function setLang(lang) {
-        if (translations[lang]) currentLang = lang;
-        try { localStorage.setItem('ui_lang', currentLang); } catch (e) {}
-        console.log('Selected language:', lang);
-
-        const langScreen = document.getElementById('screen-lang');
-        langScreen.style.opacity = '0';
-        langScreen.style.transition = 'opacity 0.5s ease';
-
-        setTimeout(() => {
-            langScreen.classList.remove('active');
-            langScreen.style.display = 'none';
-            openMainApp();
-        }, 500);
+    function initApp() {
+        if (!currentLang) {
+            document.getElementById('screen-lang').classList.add('active');
+        } else {
+            document.getElementById('screen-lang').classList.remove('active');
+            document.getElementById('main-nav').style.display = 'flex';
+            showScreen('market');
+            applyLang();
+            startFeeds();
+        }
     }
 
     function startFeeds() {
-        if (feedsStarted) return;
-        feedsStarted = true;
         updateMarket();
         setInterval(updateMarket, 5000);
         addNews();
-        addNews();
         setInterval(addNews, 10000);
     }
-
-    (function () {
-        try {
-            if (!localStorage.getItem('ui_lang')) return;
-            const langScreen = document.getElementById('screen-lang');
-            langScreen.classList.remove('active');
-            langScreen.style.display = 'none';
-            langScreen.style.opacity = '1';
-            openMainApp();
-        } catch (e) {}
-    })();
 
     const skins = [
         { n: "AK-47 | Nightwish", p: 85.40, g: "+4.2%", vol: 412 },
@@ -293,75 +170,48 @@
 
     function updateMarket() {
         const list = document.getElementById('market-list');
-        if (!list) return;
         const T = translations[currentLang] || translations.en;
-
         list.innerHTML = skins.map(s => {
-            const liq = getLiquidity(s.vol);
-
+            const liq = s.vol > 300 ? {t: T.high, c: "#00ffcc"} : s.vol > 50 ? {t: T.stable, c: "#ffa500"} : {t: T.coll, c: "#ff4b2b"};
             return `
-            <div class="card">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                    <b style="font-size: 16px;">${s.n}</b>
-                    <span style="font-size: 10px; opacity: 0.4;">ID: ${Math.floor(Math.random() * 9999)}</span>
-                </div>
-
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <div class="price">$${s.p}</div>
-                        <div style="color: ${s.g.includes('+') ? '#00ffcc' : '#ff4b2b'}; font-size: 12px;">${s.g}</div>
+                <div class="card">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <b>${s.n}</b>
+                        <span style="font-size:10px; opacity:0.3;">#${Math.floor(Math.random()*999)}</span>
                     </div>
-                </div>
-
-                <div style="height: 1px; background: rgba(255,255,255,0.05); margin: 15px 0;"></div>
-
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <div style="font-size: 9px; opacity: 0.5; text-transform: uppercase; letter-spacing: 1px;">
-                            ${T.liq_check}
-                        </div>
-                        <div style="font-size: 11px; margin-top: 2px;">
-                            ${T.lots}: <b>${s.vol}</b>
-                        </div>
+                    <div class="price" style="margin: 10px 0;">$${s.p}</div>
+                    <div style="display:flex; justify-content:space-between; font-size:11px;">
+                        <span style="color: ${liq.c}">${liq.t}</span>
+                        <span style="opacity:0.5">${T.lots}: ${s.vol}</span>
                     </div>
-                    <div style="color: ${liq.color}; font-size: 11px; font-weight: 900; text-align: right;">
-                        ${liq.text}
-                    </div>
-                </div>
-            </div>
-        `;
+                </div>`;
         }).join('');
     }
 
     function calcROI() {
         const buy = parseFloat(document.getElementById('buy-price').value) || 0;
         const sell = parseFloat(document.getElementById('sell-price').value) || 0;
-        const fee = sell * 0.15;
-        const netProfit = sell - buy - fee;
-        const roi = buy > 0 ? (netProfit / buy * 100).toFixed(2) : 0;
-        const t = translations[currentLang] || translations.en;
-        document.getElementById('calc-result').innerHTML = `<span data-t="profit">${t.profit}</span>: $${netProfit.toFixed(2)} (${roi}%)`;
+        const T = translations[currentLang] || translations.en;
+        const net = (sell * 0.85) - buy;
+        const roi = buy > 0 ? (net / buy * 100).toFixed(1) : 0;
+        document.getElementById('calc-result').innerHTML = `${T.profit}: $${net.toFixed(2)} (${roi}%)`;
     }
 
     function addNews() {
         const list = document.getElementById('news-list');
-        if (!list) return;
-
-        const T = translations[currentLang] || translations.en;
-
-        const newsBase = {
-            ru: ["Valve обновили политику...", "Крупный закуп кейсов...", "Инсайд: новая операция скоро."],
-            ua: ["Valve оновили політику...", "Великий закуп кейсів...", "Інсайд: нова операція незабаром."],
-            en: ["Valve updated policy...", "Large case buy-out...", "Insider: new operation soon."]
+        const news = {
+            ru: ["Valve обновили политику Buff163", "Крупный закуп скинов M4A1-S", "Операция ожидается в июне"],
+            ua: ["Valve оновили політику Buff163", "Великий закуп скінів M4A1-S", "Операція очікується в червні"],
+            en: ["Valve updated Buff163 policy", "Massive M4A1-S skins buy-out", "New operation expected in June"]
         };
-
-        const currentNews = newsBase[currentLang] || newsBase.en;
-        const text = currentNews[Math.floor(Math.random() * currentNews.length)];
-
-        const html = `<div class="card" style="margin-bottom:10px; font-size:13px;">${text}</div>`;
-        list.insertAdjacentHTML('afterbegin', html);
-        if (list.children.length > 5) list.lastChild.remove();
+        const arr = news[currentLang] || news.en;
+        const txt = arr[Math.floor(Math.random()*arr.length)];
+        list.insertAdjacentHTML('afterbegin', `<div class="card" style="font-size:13px;">${txt}</div>`);
+        if(list.children.length > 4) list.lastChild.remove();
     }
+
+    // Запуск
+    initApp();
 </script>
 </body>
 </html>
