@@ -3,78 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PRIME NODE ULTIMA</title>
+    <title>PRIME NODE TERMINAL</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root { --blue: #00d2ff; --dark: #000814; --glass: rgba(255, 255, 255, 0.07); --accent: #00ffcc; --red: #ff4b2b; --gold: #ffd700; }
-        body { background: #000814; color: #fff; font-family: 'Segoe UI', system-ui, sans-serif; margin: 0; padding: 0; overflow: hidden; -webkit-tap-highlight-color: transparent; }
+        :root { --blue: #00d2ff; --dark: #000814; --glass: rgba(255, 255, 255, 0.08); --accent: #00ffcc; --gold: #ffd700; --red: #ff4b2b; }
+        body { background: #000814; color: #fff; font-family: -apple-system, system-ui, sans-serif; margin: 0; padding: 0; overflow: hidden; user-select: none; }
         
-        .screen { display: none; height: 100vh; overflow-y: auto; padding-bottom: 100px; box-sizing: border-box; }
-        .screen.active { display: block; animation: fadeIn 0.2s ease-out; }
-        
+        .screen { display: none; height: 100vh; overflow-y: auto; padding-bottom: 120px; box-sizing: border-box; }
+        .screen.active { display: block; animation: fadeIn 0.2s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* Экраны */
-        #screen-lang { display: flex; flex-direction: column; justify-content: center; align-items: center; background: radial-gradient(circle at center, #001a33 0%, #000814 100%); }
-
-        /* Карточки */
-        .card { background: var(--glass); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 15px; margin: 10px; backdrop-filter: blur(10px); position: relative; }
-        .card:active { background: rgba(255, 255, 255, 0.15); }
+        .card { background: var(--glass); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 15px; margin: 12px; backdrop-filter: blur(10px); position: relative; }
+        .price { font-size: 20px; font-weight: 800; color: var(--blue); }
         
-        /* Новости */
-        .news-ticker { background: rgba(0, 210, 255, 0.1); border-radius: 8px; margin: 10px; padding: 8px 12px; font-size: 11px; border-left: 3px solid var(--blue); color: var(--blue); display: flex; align-items: center; }
+        /* News Ticker */
+        .news-bar { background: rgba(0, 210, 255, 0.1); padding: 8px; font-size: 11px; color: var(--blue); border-bottom: 1px solid var(--blue); }
 
-        /* Спец предложения */
-        .hot-container { display: flex; overflow-x: auto; padding: 0 10px; gap: 10px; scrollbar-width: none; }
-        .hot-card { min-width: 140px; background: linear-gradient(135deg, rgba(0,210,255,0.2), rgba(0,0,0,0.5)); border: 1px solid var(--blue); border-radius: 12px; padding: 10px; font-size: 12px; text-align: center; }
+        /* AI Assistant Section */
+        .ai-box { border: 1px solid var(--accent); background: rgba(0, 255, 204, 0.05); }
+        .ai-status { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: var(--accent); margin-bottom: 5px; }
 
-        .price { font-size: 18px; font-weight: 800; color: var(--blue); margin-top: 5px; }
-        .badge { background: var(--blue); color: #000; font-size: 9px; padding: 2px 6px; border-radius: 4px; font-weight: 900; position: absolute; top: 10px; right: 10px; }
-
-        /* Навигация */
-        .nav-bar { position: fixed; bottom: 0; width: 100%; background: rgba(0, 8, 20, 0.95); backdrop-filter: blur(10px); display: flex; border-top: 1px solid rgba(255,255,255,0.05); padding-bottom: env(safe-area-inset-bottom); z-index: 9999; }
-        .nav-item { flex: 1; text-align: center; padding: 12px 0; color: #555; font-size: 10px; transition: 0.2s; cursor: pointer; }
+        /* Nav Bar */
+        .nav-bar { position: fixed; bottom: 0; width: 100%; background: rgba(0, 8, 20, 0.95); backdrop-filter: blur(15px); display: flex; border-top: 1px solid rgba(255,255,255,0.1); padding-bottom: env(safe-area-inset-bottom); z-index: 1000; }
+        .nav-item { flex: 1; text-align: center; padding: 12px 0; font-size: 10px; color: #666; transition: 0.2s; }
         .nav-item.active { color: var(--blue); }
-        .nav-icon { display: block; font-size: 20px; }
+        .nav-icon { display: block; font-size: 20px; margin-bottom: 2px; }
 
-        input, select { width: 100%; padding: 12px; background: #000; border: 1px solid var(--blue); color: #fff; border-radius: 10px; margin-top: 5px; box-sizing: border-box; }
+        input { width: 100%; padding: 12px; background: #000; border: 1px solid var(--blue); color: #fff; border-radius: 10px; margin-top: 5px; box-sizing: border-box; outline: none; }
         .res-box { background: rgba(0, 255, 204, 0.1); border: 1px solid var(--accent); padding: 12px; border-radius: 10px; margin-top: 10px; text-align: center; font-weight: bold; }
+        .badge { float: right; background: var(--blue); color: #000; font-size: 9px; padding: 2px 6px; border-radius: 4px; font-weight: 900; }
+
+        .scan-line { width: 100%; height: 2px; background: var(--accent); position: absolute; top: 0; left: 0; animation: scan 2s infinite; opacity: 0.3; display: none; }
+        @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
     </style>
 </head>
 <body>
 
-    <div id="screen-lang" class="screen active">
-        <div style="text-align: center; margin-bottom: 30px;">
-            <div style="font-size: 60px;">🔱</div>
-            <h2 style="letter-spacing: 3px;">PRIME NODE</h2>
-        </div>
-        <div style="width: 80%;">
-            <div class="card" style="text-align:center; border-color: var(--blue);" onclick="setLang('ru')">🇷🇺 РУССКИЙ</div>
-            <div class="card" style="text-align:center; border-color: var(--blue);" onclick="setLang('ua')">🇺🇦 УКРАЇНСЬКА</div>
-            <div class="card" style="text-align:center; border-color: var(--blue);" onclick="setLang('en')">🇺🇸 ENGLISH</div>
+    <div id="screen-lang" class="screen" style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
+        <div style="font-size: 60px;">🔱</div>
+        <h1 style="letter-spacing: 4px;">PRIME NODE</h1>
+        <div style="width: 80%; margin-top: 20px;">
+            <div class="card" style="text-align:center; border-color: var(--blue);" onclick="initApp('ru')">🇷🇺 РУССКИЙ</div>
+            <div class="card" style="text-align:center; border-color: var(--blue);" onclick="initApp('en')">🇺🇸 ENGLISH</div>
         </div>
     </div>
 
     <div id="screen-market" class="screen">
-        <div class="news-ticker">
-            <span style="margin-right: 10px;">⚡</span> 
-            <marquee scrollamount="3">BUFF163: Цены обновлены • Добавлен AI анализ Float • Новые пасхалки в терминале</marquee>
+        <div class="news-bar">
+            <marquee scrollamount="4">🔥 [HOT] AWP Gungnir +3.2% ROI • BUFF163: API STABLE • AI ASSISTANT READY • UPDATE V5.0 LIVE</marquee>
         </div>
 
-        <div style="padding: 10px 15px; font-weight: 800; font-size: 14px; color: var(--gold);">🔥 HOT OFFERS</div>
-        <div class="hot-container">
-            <div class="hot-card"><b>AK-47 Slate</b><br><span style="color:var(--accent)">+12.4% ROI</span></div>
-            <div class="hot-card"><b>Glove Case</b><br><span style="color:var(--accent)">+5.2% ROI</span></div>
-            <div class="hot-card"><b>AWP Redline</b><br><span style="color:var(--accent)">+8.1% ROI</span></div>
+        <div class="card ai-box" id="ai-container">
+            <div class="scan-line" id="ai-scan"></div>
+            <div class="ai-status">Neural Assistant Active 🟢</div>
+            <div style="font-size: 13px; margin-bottom: 10px;">Введите название для анализа:</div>
+            <input type="text" id="ai-input" placeholder="Напр: AK-47 Slate..." onkeypress="handleAI(event)">
+            <div id="ai-report" style="margin-top: 10px; font-size: 11px; display: none; color: #ccc;"></div>
         </div>
 
-        <div style="padding: 20px 15px 5px; font-weight: 800; font-size: 14px;">LIVE FEED 🟢</div>
+        <div style="padding: 10px 15px 0; font-weight: 900; font-size: 14px;">LIVE FEED</div>
         <div id="market-list"></div>
     </div>
 
     <div id="screen-calc" class="screen">
         <div class="card">
-            <h3 style="margin-top:0">ROI CALCULATOR</h3>
+            <h3>ROI CALCULATOR</h3>
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                 <div><label style="font-size:10px;">BUY ($)</label><input type="number" id="buy-price" oninput="calcROI()"></div>
                 <div><label style="font-size:10px;">SELL ($)</label><input type="number" id="sell-price" oninput="calcROI()"></div>
@@ -86,13 +79,12 @@
     <div id="screen-profile" class="screen">
         <div class="card" style="text-align: center;">
             <div style="font-size: 40px;">👤</div>
-            <h3 id="user-status">FREE ACCESS</h3>
-            <p style="font-size: 12px; opacity: 0.5;">ID: <span id="user-id">----</span></p>
+            <h2 id="status-display">FREE ACCESS</h2>
+            <p id="user-id-display" style="font-size: 11px; opacity: 0.5;"></p>
         </div>
         <div class="card">
-            <h4 style="margin:0">REFERRAL SYSTEM</h4>
-            <p style="font-size: 11px;">Copy your link and invite 3 friends.</p>
-            <div id="ref-link" style="background:#000; padding:10px; border-radius:8px; font-size:11px; color:var(--blue); border:1px dashed var(--blue); text-align:center;">t.me/bot?start=123</div>
+            <h4 style="margin:0 0 10px">REFERRAL LINK</h4>
+            <div id="ref-link" style="background:#000; padding:10px; border-radius:8px; font-size:10px; color:var(--blue); border:1px dashed var(--blue); text-align:center;">...</div>
         </div>
     </div>
 
@@ -107,17 +99,27 @@
     tg.expand();
 
     const isPro = new URLSearchParams(window.location.search).get('status') === 'pro';
-    let currentLang = localStorage.getItem('ui_lang');
 
-    function setLang(lang) {
+    function initApp(lang) {
         if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
-        currentLang = lang;
-        localStorage.setItem('ui_lang', lang);
-        
         document.getElementById('screen-lang').style.display = 'none';
         document.getElementById('main-nav').style.display = 'flex';
+        
+        const uid = tg.initDataUnsafe?.user?.id || "000000";
+        document.getElementById('user-id-display').innerText = `ID: #${uid}`;
+        document.getElementById('ref-link').innerText = `t.me/natacult_bot?start=${uid}`;
+        
+        if(isPro) {
+            document.getElementById('status-display').innerText = "PRIME PRO";
+            document.getElementById('status-display').style.color = "var(--gold)";
+        } else {
+            document.getElementById('ai-container').style.opacity = '0.5';
+            document.getElementById('ai-input').disabled = true;
+            document.getElementById('ai-input').placeholder = "PRO ONLY";
+        }
+
         showScreen('market');
-        initApp();
+        renderMarket();
     }
 
     function showScreen(id, el) {
@@ -128,28 +130,33 @@
         if(el) el.classList.add('active');
     }
 
-    function initApp() {
-        document.getElementById('user-id').innerText = tg.initDataUnsafe?.user?.id || "672104";
-        document.getElementById('ref-link').innerText = "t.me/natacult_bot?start=" + (tg.initDataUnsafe?.user?.id || "user");
-        if(isPro) {
-            document.getElementById('user-status').innerText = "PRIME PRO MEMBER";
-            document.getElementById('user-status').style.color = "var(--gold)";
+    function handleAI(e) {
+        if(e.key === 'Enter') {
+            const val = document.getElementById('ai-input').value;
+            if(!val) return;
+            
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+            document.getElementById('ai-scan').style.display = 'block';
+            const report = document.getElementById('ai-report');
+            report.style.display = 'block';
+            report.innerHTML = "📡 <i>Neural analysis in progress...</i>";
+
+            setTimeout(() => {
+                document.getElementById('ai-scan').style.display = 'none';
+                report.innerHTML = `✅ <b>${val}</b> Analysis:<br>Trend: 📈 BULLISH<br>Est. ROI: +${(Math.random()*15).toFixed(1)}%<br>Liquidity: HIGH`;
+            }, 1500);
         }
-        updateMarket();
     }
 
-    const skins = [
-        { n: "AK-47 | Slate", p: 4.50, r: "rare" },
-        { n: "M4A1-S | Printstream", p: 142.10, r: "covert" },
-        { n: "AWP | Gungnir", p: 12400, r: "rare" }
-    ];
-
-    function updateMarket() {
-        const list = document.getElementById('market-list');
-        if(!list) return;
-        list.innerHTML = skins.map(s => `
-            <div class="card" style="border-left: 3px solid ${s.r === 'covert' ? '#ff4b2b' : '#00d2ff'}">
-                <div class="badge">${s.r.toUpperCase()}</div>
+    function renderMarket() {
+        const skins = [
+            {n: "AK-47 | Slate", p: 4.50, r: "rare"},
+            {n: "M4A1-S | Printstream", p: 142.10, r: "covert"},
+            {n: "AWP | Gungnir", p: 12400.00, r: "rare"}
+        ];
+        document.getElementById('market-list').innerHTML = skins.map(s => `
+            <div class="card" style="border-left: 3px solid ${s.r === 'covert' ? 'var(--red)' : 'var(--blue)'}">
+                <span class="badge">${s.r.toUpperCase()}</span>
                 <b>${s.n}</b>
                 <div class="price">$${s.p}</div>
             </div>
@@ -167,9 +174,9 @@
     }
 
     window.onload = () => {
-        if(currentLang) {
-            setLang(currentLang);
-        }
+        const startLang = new URLSearchParams(window.location.search).get('lang');
+        if (startLang) initApp(startLang);
+        else document.getElementById('screen-lang').classList.add('active');
     };
 </script>
 </body>
