@@ -129,9 +129,22 @@
     }
 
     function setLang(lang) {
-        currentLang = lang;
-        localStorage.setItem('ui_lang', lang);
-        initApp();
+    currentLang = lang;
+    localStorage.setItem('ui_lang', lang);
+    
+    // ПРИНУДИТЕЛЬНО обновляем все тексты сразу после выбора
+    applyLang(); 
+    
+    const langScreen = document.getElementById('screen-lang');
+    langScreen.style.opacity = '0';
+    
+    setTimeout(() => {
+        langScreen.classList.remove('active');
+        langScreen.style.display = 'none';
+        document.getElementById('main-nav').style.display = 'flex';
+        showScreen('market');
+        startFeeds(); // Запускаем маркет и новости только после выбора языка
+    }, 400);
     }
 
     function showScreen(id, el) {
@@ -198,8 +211,8 @@
     }
 
     function addNews() {
-        const list = document.getElementById('news-list');
-        const news = {
+        const activeLang = localStorage.getItem('ui_lang') || currentLang || 'en';
+        const arr = news[activeLang] || news.en;
             ru: ["Valve обновили политику Buff163", "Крупный закуп скинов M4A1-S", "Операция ожидается в июне"],
             ua: ["Valve оновили політику Buff163", "Великий закуп скінів M4A1-S", "Операція очікується в червні"],
             en: ["Valve updated Buff163 policy", "Massive M4A1-S skins buy-out", "New operation expected in June"]
