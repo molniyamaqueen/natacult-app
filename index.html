@@ -3,38 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PRIME NODE TERMINAL</title>
+    <title>PRIME NODE ULTIMA</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root { --blue: #00d2ff; --dark: #000814; --glass: rgba(255, 255, 255, 0.08); --accent: #00ffcc; --gold: #ffd700; --red: #ff4b2b; }
         body { background: #000814; color: #fff; font-family: -apple-system, system-ui, sans-serif; margin: 0; padding: 0; overflow: hidden; user-select: none; }
         
-        .screen { display: none; height: 100vh; overflow-y: auto; padding-bottom: 120px; box-sizing: border-box; }
+        .screen { display: none; height: 100vh; overflow-y: auto; padding-bottom: 110px; box-sizing: border-box; }
         .screen.active { display: block; animation: fadeIn 0.2s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         .card { background: var(--glass); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 15px; margin: 12px; backdrop-filter: blur(10px); position: relative; }
-        .price { font-size: 20px; font-weight: 800; color: var(--blue); }
         
-        /* News Ticker */
-        .news-bar { background: rgba(0, 210, 255, 0.1); padding: 8px; font-size: 11px; color: var(--blue); border-bottom: 1px solid var(--blue); }
-
-        /* AI Assistant Section */
-        .ai-box { border: 1px solid var(--accent); background: rgba(0, 255, 204, 0.05); }
-        .ai-status { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: var(--accent); margin-bottom: 5px; }
+        /* News Screen Styles */
+        .news-item { border-left: 3px solid var(--blue); margin-bottom: 10px; background: rgba(0, 210, 255, 0.03); }
+        .news-date { font-size: 9px; color: var(--blue); font-weight: bold; margin-bottom: 5px; opacity: 0.7; }
+        .news-tag { background: var(--blue); color: #000; font-size: 8px; padding: 2px 5px; border-radius: 3px; font-weight: 900; margin-left: 5px; }
 
         /* Nav Bar */
-        .nav-bar { position: fixed; bottom: 0; width: 100%; background: rgba(0, 8, 20, 0.95); backdrop-filter: blur(15px); display: flex; border-top: 1px solid rgba(255,255,255,0.1); padding-bottom: env(safe-area-inset-bottom); z-index: 1000; }
-        .nav-item { flex: 1; text-align: center; padding: 12px 0; font-size: 10px; color: #666; transition: 0.2s; }
-        .nav-item.active { color: var(--blue); }
-        .nav-icon { display: block; font-size: 20px; margin-bottom: 2px; }
+        .nav-bar { position: fixed; bottom: 0; width: 100%; background: rgba(0, 8, 20, 0.96); backdrop-filter: blur(15px); display: flex; border-top: 1px solid rgba(255,255,255,0.1); padding-bottom: env(safe-area-inset-bottom); z-index: 1000; }
+        .nav-item { flex: 1; text-align: center; padding: 10px 0; font-size: 9px; color: #555; transition: 0.2s; }
+        .nav-item.active { color: var(--blue); transform: translateY(-2px); }
+        .nav-icon { display: block; font-size: 18px; margin-bottom: 2px; }
 
         input { width: 100%; padding: 12px; background: #000; border: 1px solid var(--blue); color: #fff; border-radius: 10px; margin-top: 5px; box-sizing: border-box; outline: none; }
         .res-box { background: rgba(0, 255, 204, 0.1); border: 1px solid var(--accent); padding: 12px; border-radius: 10px; margin-top: 10px; text-align: center; font-weight: bold; }
         .badge { float: right; background: var(--blue); color: #000; font-size: 9px; padding: 2px 6px; border-radius: 4px; font-weight: 900; }
-
-        .scan-line { width: 100%; height: 2px; background: var(--accent); position: absolute; top: 0; left: 0; animation: scan 2s infinite; opacity: 0.3; display: none; }
-        @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
     </style>
 </head>
 <body>
@@ -49,25 +43,45 @@
     </div>
 
     <div id="screen-market" class="screen">
-        <div class="news-bar">
-            <marquee scrollamount="4">🔥 [HOT] AWP Gungnir +3.2% ROI • BUFF163: API STABLE • AI ASSISTANT READY • UPDATE V5.0 LIVE</marquee>
+        <div style="padding: 20px 15px 5px; font-weight: 900; font-size: 16px; display: flex; justify-content: space-between;">
+            <span>TERMINAL V5.0</span>
+            <span style="color: var(--accent); font-size: 10px;">ONLINE 🟢</span>
+        </div>
+        
+        <div class="card" style="border: 1px solid var(--accent); background: rgba(0, 255, 204, 0.03);">
+            <div style="font-size: 10px; color: var(--accent); margin-bottom: 8px;">AI ANALYZER PRO</div>
+            <input type="text" id="ai-input" placeholder="Название скина..." onkeypress="handleAI(event)">
+            <div id="ai-report" style="margin-top: 10px; font-size: 11px; display: none;"></div>
         </div>
 
-        <div class="card ai-box" id="ai-container">
-            <div class="scan-line" id="ai-scan"></div>
-            <div class="ai-status">Neural Assistant Active 🟢</div>
-            <div style="font-size: 13px; margin-bottom: 10px;">Введите название для анализа:</div>
-            <input type="text" id="ai-input" placeholder="Напр: AK-47 Slate..." onkeypress="handleAI(event)">
-            <div id="ai-report" style="margin-top: 10px; font-size: 11px; display: none; color: #ccc;"></div>
-        </div>
-
-        <div style="padding: 10px 15px 0; font-weight: 900; font-size: 14px;">LIVE FEED</div>
         <div id="market-list"></div>
+    </div>
+
+    <div id="screen-news" class="screen">
+        <div style="padding: 20px 15px 5px; font-weight: 900; font-size: 18px; color: var(--blue);">MARKET INSIDER</div>
+        
+        <div class="card news-item">
+            <div class="news-date">04 APR <span class="news-tag">HOT</span></div>
+            <b style="font-size: 14px;">Обновление алгоритмов Buff163</b>
+            <p style="font-size: 11px; opacity: 0.7; margin: 5px 0 0;">AI теперь точнее предсказывает падение цен на кейсы после 18:00 по МСК.</p>
+        </div>
+
+        <div class="card news-item">
+            <div class="news-date">03 APR <span class="news-tag">INFO</span></div>
+            <b style="font-size: 14px;">Новый завоз Souvenir скинов</b>
+            <p style="font-size: 11px; opacity: 0.7; margin: 5px 0 0;">Ожидается рост спроса на Dust II коллекцию. Рекомендуем холдить.</p>
+        </div>
+
+        <div class="card news-item">
+            <div class="news-date">01 APR <span class="news-tag">PATCH</span></div>
+            <b style="font-size: 14px;">Версия терминала v5.0</b>
+            <p style="font-size: 11px; opacity: 0.7; margin: 5px 0 0;">Добавлен полноценный раздел новостей и улучшен отклик интерфейса.</p>
+        </div>
     </div>
 
     <div id="screen-calc" class="screen">
         <div class="card">
-            <h3>ROI CALCULATOR</h3>
+            <h3 style="margin-top:0">ROI CALCULATOR</h3>
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                 <div><label style="font-size:10px;">BUY ($)</label><input type="number" id="buy-price" oninput="calcROI()"></div>
                 <div><label style="font-size:10px;">SELL ($)</label><input type="number" id="sell-price" oninput="calcROI()"></div>
@@ -79,17 +93,18 @@
     <div id="screen-profile" class="screen">
         <div class="card" style="text-align: center;">
             <div style="font-size: 40px;">👤</div>
-            <h2 id="status-display">FREE ACCESS</h2>
+            <h2 id="status-display">FREE MEMBER</h2>
             <p id="user-id-display" style="font-size: 11px; opacity: 0.5;"></p>
         </div>
         <div class="card">
-            <h4 style="margin:0 0 10px">REFERRAL LINK</h4>
-            <div id="ref-link" style="background:#000; padding:10px; border-radius:8px; font-size:10px; color:var(--blue); border:1px dashed var(--blue); text-align:center;">...</div>
+            <h4 style="margin:0 0 10px">INVITE SYSTEM</h4>
+            <div id="ref-link" style="background:#000; padding:10px; border-radius:8px; font-size:10px; color:var(--blue); border:1px dashed var(--blue); text-align:center;">loading...</div>
         </div>
     </div>
 
     <nav class="nav-bar" id="main-nav" style="display: none;">
         <div class="nav-item active" onclick="showScreen('market', this)"><span class="nav-icon">📊</span>MARKET</div>
+        <div class="nav-item" onclick="showScreen('news', this)"><span class="nav-icon">🗞</span>NEWS</div>
         <div class="nav-item" onclick="showScreen('calc', this)"><span class="nav-icon">⚡</span>TOOLS</div>
         <div class="nav-item" onclick="showScreen('profile', this)"><span class="nav-icon">👤</span>PROFILE</div>
     </nav>
@@ -105,17 +120,13 @@
         document.getElementById('screen-lang').style.display = 'none';
         document.getElementById('main-nav').style.display = 'flex';
         
-        const uid = tg.initDataUnsafe?.user?.id || "000000";
+        const uid = tg.initDataUnsafe?.user?.id || "672104";
         document.getElementById('user-id-display').innerText = `ID: #${uid}`;
         document.getElementById('ref-link').innerText = `t.me/natacult_bot?start=${uid}`;
         
         if(isPro) {
             document.getElementById('status-display').innerText = "PRIME PRO";
             document.getElementById('status-display').style.color = "var(--gold)";
-        } else {
-            document.getElementById('ai-container').style.opacity = '0.5';
-            document.getElementById('ai-input').disabled = true;
-            document.getElementById('ai-input').placeholder = "PRO ONLY";
         }
 
         showScreen('market');
@@ -133,18 +144,12 @@
     function handleAI(e) {
         if(e.key === 'Enter') {
             const val = document.getElementById('ai-input').value;
-            if(!val) return;
-            
-            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
-            document.getElementById('ai-scan').style.display = 'block';
             const report = document.getElementById('ai-report');
             report.style.display = 'block';
-            report.innerHTML = "📡 <i>Neural analysis in progress...</i>";
-
+            report.innerHTML = "📡 Analyzing neural paths...";
             setTimeout(() => {
-                document.getElementById('ai-scan').style.display = 'none';
-                report.innerHTML = `✅ <b>${val}</b> Analysis:<br>Trend: 📈 BULLISH<br>Est. ROI: +${(Math.random()*15).toFixed(1)}%<br>Liquidity: HIGH`;
-            }, 1500);
+                report.innerHTML = `✅ <b>${val}</b>: Потенциал +${(Math.random()*12).toFixed(1)}% ROI в течение 48ч.`;
+            }, 1000);
         }
     }
 
@@ -158,7 +163,7 @@
             <div class="card" style="border-left: 3px solid ${s.r === 'covert' ? 'var(--red)' : 'var(--blue)'}">
                 <span class="badge">${s.r.toUpperCase()}</span>
                 <b>${s.n}</b>
-                <div class="price">$${s.p}</div>
+                <div class="price">$${s.p.toLocaleString()}</div>
             </div>
         `).join('');
     }
