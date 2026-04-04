@@ -7,195 +7,227 @@
     <title>PRIME NODE ULTIMA</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root { --blue: #00d2ff; --dark: #000814; --glass: rgba(255, 255, 255, 0.05); --accent: #00ffcc; --red: #ff4b2b; }
-        body { background: #000814; color: #fff; font-family: 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; overflow: hidden; user-select: none; -webkit-user-select: none; }
+        :root { --blue: #00d2ff; --dark: #000814; --glass: rgba(255, 255, 255, 0.05); --accent: #00ffcc; --red: #ff4b2b; --gold: #ffd700; }
+        body { background: #000814; color: #fff; font-family: 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; overflow: hidden; user-select: none; -webkit-user-select: none; transition: background 0.3s; }
         
-        .screen { display: none; height: 100vh; overflow-y: auto; padding-bottom: 100px; box-sizing: border-box; }
+        /* OLED MODE */
+        body.oled { background: #000; }
+        body.oled .card { background: rgba(255,255,255,0.02); border-color: rgba(255,255,255,0.05); }
+
+        .screen { display: none; height: 100vh; overflow-y: auto; padding-bottom: 120px; box-sizing: border-box; }
         .screen.active { display: block; animation: fadeIn 0.3s ease; }
         
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
 
-        #screen-lang {
-            display: none;
-            position: fixed;
-            inset: 0;
-            z-index: 2000;
-            padding: 20px;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            text-align: center;
-        }
-        #screen-lang.active { display: flex; }
+        /* RARITY GLOW */
+        .card.rare { border-left: 3px solid var(--gold); box-shadow: inset 10px 0 15px -10px rgba(255, 215, 0, 0.3); }
+        .card.covert { border-left: 3px solid var(--red); }
 
-        .lang-btn {
-            width: 100%;
-            max-width: 280px;
-            padding: 18px;
-            margin: 8px 0;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(0,210,255,0.2);
-            border-radius: 15px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .lang-btn:active { transform: scale(0.96); background: rgba(0,210,255,0.1); border-color: var(--blue); }
-
-        .nav-bar { position: fixed; bottom: 0; width: 100%; background: rgba(0, 8, 20, 0.9); backdrop-filter: blur(15px); display: flex; border-top: 1px solid rgba(0, 210, 255, 0.1); z-index: 1000; }
-        .nav-item { flex: 1; text-align: center; padding: 12px 0; font-size: 10px; color: #668ba4; transition: 0.2s; }
-        .nav-item.active { color: var(--blue); }
+        /* NAV BAR FIX FOR iPHONE */
+        .nav-bar { position: fixed; bottom: 0; width: 100%; background: rgba(0, 8, 20, 0.9); backdrop-filter: blur(15px); display: flex; border-top: 1px solid rgba(0, 210, 255, 0.1); z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
+        .nav-item { flex: 1; text-align: center; padding: 12px 0; font-size: 10px; color: #668ba4; transition: 0.2s; cursor: pointer; }
+        .nav-item.active { color: var(--blue); transform: translateY(-2px); }
         .nav-icon { display: block; font-size: 20px; margin-bottom: 2px; }
 
-        .card { background: var(--glass); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 18px; padding: 15px; margin: 12px; backdrop-filter: blur(10px); }
+        .card { background: var(--glass); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 18px; padding: 15px; margin: 12px; backdrop-filter: blur(10px); position: relative; transition: transform 0.1s; }
+        .card:active { transform: scale(0.98); }
         .price { font-size: 22px; font-weight: 900; color: var(--blue); }
         
-        input { width: 100%; padding: 12px; background: #000; border: 1px solid rgba(0, 210, 255, 0.2); color: #fff; border-radius: 10px; outline: none; box-sizing: border-box; font-size: 16px; }
-        .res-box { background: rgba(0, 255, 204, 0.05); border: 1px solid var(--accent); padding: 12px; border-radius: 10px; margin-top: 15px; text-align: center; color: var(--accent); font-size: 14px; }
+        .badge { position: absolute; top: 10px; right: 10px; font-size: 9px; padding: 2px 6px; border-radius: 5px; background: var(--blue); color: #000; font-weight: bold; }
+        
+        input, select { width: 100%; padding: 12px; background: #000; border: 1px solid rgba(0, 210, 255, 0.2); color: #fff; border-radius: 10px; outline: none; box-sizing: border-box; font-size: 16px; margin-top: 5px; transition: border-color 0.3s; }
+        input:focus, select:focus { border-color: var(--blue); }
+        .res-box { background: rgba(0, 255, 204, 0.05); border: 1px solid var(--accent); padding: 12px; border-radius: 10px; margin-top: 15px; text-align: center; color: var(--accent); font-size: 14px; font-weight: bold; }
+        
+        .pro-blur { filter: blur(4px); pointer-events: none; }
+        .pro-lock { position: relative; }
+        .pro-lock::after { content: "💎 PRO ONLY"; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); backdrop-filter: blur(2px); border-radius: 18px; font-size: 14px; font-weight: bold; color: var(--gold); z-index: 5; }
     </style>
 </head>
 <body>
 
-    <div id="screen-lang" class="screen" style="background: radial-gradient(circle at center, #001a33 0%, #000814 100%);">
-        <div style="margin-bottom: 30px;">
-            <div style="font-size: 45px;">🔱</div>
-            <h1 style="letter-spacing: 3px; margin: 5px 0;">PRIME <span style="color:var(--blue)">NODE</span></h1>
-            <p data-t="lang_subtitle" style="font-size: 9px; opacity: 0.5; letter-spacing: 1px;">NEURAL QUANTUM TERMINAL</p>
+    <div id="screen-lang" class="screen" style="background: radial-gradient(circle at center, #001a33 0%, #000814 100%); display: flex; flex-direction: column; justify-content: center; align-items: center;">
+        <div style="margin-bottom: 40px; text-align: center;">
+            <div style="font-size: 55px; cursor: pointer; transition: transform 0.3s;" id="logo-trigger">🔱</div>
+            <h1 style="letter-spacing: 4px; margin: 10px 0;">PRIME <span style="color:var(--blue)">NODE</span></h1>
+            <p style="font-size: 10px; opacity: 0.5; letter-spacing: 2px;">NEURAL QUANTUM TERMINAL</p>
         </div>
-        <div class="lang-btn" onclick="setLang('ru')"><span>🇷🇺 РУССКИЙ</span><span>→</span></div>
-        <div class="lang-btn" onclick="setLang('ua')"><span>🇺🇦 УКРАЇНСЬКА</span><span>→</span></div>
-        <div class="lang-btn" onclick="setLang('en')"><span>🇺🇸 ENGLISH</span><span>→</span></div>
+        <div style="width: 100%; max-width: 280px; padding: 0 20px; box-sizing: border-box;">
+            <div class="card" style="text-align: center; margin: 8px 0; border-color: rgba(0,210,255,0.3);" onclick="setLang('ru')">🇷🇺 РУССКИЙ</div>
+            <div class="card" style="text-align: center; margin: 8px 0; border-color: rgba(0,210,255,0.3);" onclick="setLang('ua')">🇺🇦 УКРАЇНСЬКА</div>
+            <div class="card" style="text-align: center; margin: 8px 0; border-color: rgba(0,210,255,0.3);" onclick="setLang('en')">🇺🇸 ENGLISH</div>
+        </div>
     </div>
 
     <div id="screen-market" class="screen">
-        <div style="padding: 20px;">
-            <div style="font-size: 18px; font-weight: 900;">PRIME <span style="color:var(--blue)">NODE</span></div>
-            <div data-t="live_feed" style="font-size: 9px; color: var(--accent);">LIVE MARKET FEED</div>
+        <div style="padding: 20px; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <div style="font-size: 18px; font-weight: 900;">PRIME <span style="color:var(--blue)">NODE</span></div>
+                <div id="live-indicator" style="font-size: 9px; color: var(--accent); font-weight: bold; animation: pulse 2s infinite;"><span data-lang="live_feed">LIVE MARKET FEED</span> 🟢</div>
+            </div>
+            <div id="currency-toggle" onclick="toggleCurrency()" style="background: var(--glass); padding: 5px 12px; border-radius: 8px; font-size: 12px; font-weight: bold; border: 1px solid var(--blue); cursor: pointer;">$ USD</div>
         </div>
         <div id="market-list"></div>
     </div>
 
     <div id="screen-calc" class="screen">
         <div class="card">
-            <h3 style="margin-top:0"><span data-t="calc_title">ROI CALCULATOR</span></h3>
+            <h3 style="margin-top:0" data-lang="calc_title">ROI CALCULATOR</h3>
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                 <div>
-                    <label style="font-size:10px; opacity: 0.6;"><span data-t="buy">BUY</span> ($)</label>
+                    <label style="font-size:10px; opacity: 0.6;" data-lang="buy">BUY ($)</label>
                     <input type="number" id="buy-price" placeholder="0.00" oninput="calcROI()">
                 </div>
                 <div>
-                    <label style="font-size:10px; opacity: 0.6;"><span data-t="sell">SELL</span> ($)</label>
+                    <label style="font-size:10px; opacity: 0.6;" data-lang="sell">SELL ($)</label>
                     <input type="number" id="sell-price" placeholder="0.00" oninput="calcROI()">
                 </div>
             </div>
-            <div id="calc-result" class="res-box">ROI: 0%</div>
+            <div id="calc-result" class="res-box"><span data-lang="profit">PROFIT</span>: $0.00 (0%)</div>
+        </div>
+
+        <div id="invest-block" class="card">
+            <h3 style="margin-top:0" data-lang="invest_title">INVESTMENT PREDICTION</h3>
+            <label style="font-size:10px; opacity: 0.6;" data-lang="hold_period">HOLD PERIOD (MONTHS)</label>
+            <select id="invest-period" onchange="calcInvest()">
+                <option value="3">3 Months</option>
+                <option value="6">6 Months</option>
+                <option value="12">12 Months</option>
+            </select>
+            <div id="invest-result" class="res-box" style="color: var(--blue); border-color: var(--blue);">EST. RETURN: --</div>
         </div>
     </div>
 
-    <div id="screen-news" class="screen">
-        <div style="padding: 20px;">
-            <h3 data-t="news">NEWS</h3>
-            <div id="news-list"></div>
+    <div id="screen-profile" class="screen">
+        <div class="card" style="text-align: center; border-bottom: 2px solid var(--blue);">
+            <div style="font-size: 45px; margin-bottom: 10px;">🏆</div>
+            <h2 id="user-status-text" style="margin: 0; text-transform: uppercase;">FREE MEMBER</h2>
+            <p style="font-size: 12px; opacity: 0.6; margin-top: 5px;">Rank: #1,240 | ROI: 4.2%</p>
+        </div>
+        
+        <div class="card">
+            <h4 style="margin:0 0 10px 0;" data-lang="ref_title">REFERRAL SYSTEM</h4>
+            <p style="font-size: 11px; color: #aaa;" data-lang="ref_desc">Invite 3 friends to get PRO for 7 days.</p>
+            <div id="ref-link" style="background: #000; padding: 12px; border-radius: 8px; font-size: 11px; color: var(--blue); border: 1px dashed var(--blue); text-align: center; font-weight: bold; word-break: break-all;">t.me/prime_node_bot?start=ref</div>
+        </div>
+
+        <div class="card">
+            <h4 style="margin:0 0 15px 0;">SETTINGS</h4>
+            <div style="display:flex; justify-content: space-between; align-items: center;">
+                <span style="font-weight: bold; font-size: 14px;">OLED MODE</span>
+                <input type="checkbox" id="oled-switch" onchange="toggleOled()" style="width: 40px; height: 20px; accent-color: var(--blue);">
+            </div>
         </div>
     </div>
 
     <nav class="nav-bar" id="main-nav" style="display: none;">
-        <div class="nav-item active" onclick="showScreen('market', this)"><span class="nav-icon">📊</span><span data-t="market">Market</span></div>
-        <div class="nav-item" onclick="showScreen('calc', this)"><span class="nav-icon">🧮</span><span data-t="calc">Calc</span></div>
-        <div class="nav-item" onclick="showScreen('news', this)"><span class="nav-icon">📰</span><span data-t="news">News</span></div>
+        <div class="nav-item active" onclick="showScreen('market', this)"><span class="nav-icon">📊</span><span data-lang="nav_market">Market</span></div>
+        <div class="nav-item" onclick="showScreen('calc', this)"><span class="nav-icon">⚡</span><span data-lang="nav_tools">Tools</span></div>
+        <div class="nav-item" onclick="showScreen('profile', this)"><span class="nav-icon">👤</span><span data-lang="nav_profile">Profile</span></div>
     </nav>
 
 <script>
     const tg = window.Telegram.WebApp;
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    // Подготовка Telegram API
     tg.expand();
-    tg.ready();
+    tg.setHeaderColor('#000814');
+    tg.setBackgroundColor('#000814');
 
-    const translations = {
-        ru: { market: "МАРКЕТ", calc: "КАЛЬКУЛЯТОР", news: "НОВОСТИ", buy: "ЗАКУП", sell: "ПРОДАЖА", profit: "ПРИБЫЛЬ", liq_check: "ЛИКВИДНОСТЬ", lots: "Лоты", high: "ВЫСОКАЯ 💎", stable: "СТАБИЛЬНАЯ ✅", coll: "РЕДКАЯ ⚠️", lang_subtitle: "КВАНТОВЫЙ ТЕРМИНАЛ", live_feed: "ПРЯМОЙ ЭФИР РЫНКА", calc_title: "ROI КАЛЬКУЛЯТОР" },
-        ua: { market: "РИНОК", calc: "КАЛЬКУЛЯТОР", news: "НОВИНИ", buy: "ЗАКУП", sell: "ПРОДАЖ", profit: "ПРИБУТОК", liq_check: "ЛІКВІДНІСТЬ", lots: "Лоти", high: "ВИСОКА 💎", stable: "СТАБІЛЬНА ✅", coll: "РІДКІСНА ⚠️", lang_subtitle: "КВАНТОВИЙ ТЕРМІНАЛ", live_feed: "ПРЯМИЙ ЕФІР РИНКУ", calc_title: "ROI КАЛЬКУЛЯТОР" },
-        en: { market: "MARKET", calc: "CALCULATOR", news: "NEWS", buy: "BUY", sell: "SELL", profit: "PROFIT", liq_check: "LIQUIDITY", lots: "Lots", high: "HIGH 💎", stable: "STABLE ✅", coll: "COLLECTIBLE ⚠️", lang_subtitle: "QUANTUM TERMINAL", live_feed: "LIVE MARKET FEED", calc_title: "ROI CALCULATOR" }
+    const isPro = urlParams.get('status') === 'pro';
+    let currentLang = urlParams.get('lang') || localStorage.getItem('ui_lang') || null;
+    let currency = 'USD';
+
+    // СЛОВАРЬ ПЕРЕВОДОВ
+    const dict = {
+        ru: { live_feed: "ПРЯМОЙ ЭФИР", calc_title: "ROI КАЛЬКУЛЯТОР", buy: "ЗАКУП", sell: "ПРОДАЖА", profit: "ПРИБЫЛЬ", invest_title: "ИНВЕСТ ПРОГНОЗ", hold_period: "СРОК (МЕСЯЦЫ)", ref_title: "РЕФЕРАЛЬНАЯ СИСТЕМА", ref_desc: "Пригласи 3 друзей и получи PRO.", nav_market: "Маркет", nav_tools: "Тулзы", nav_profile: "Профиль", pro_target: "ЦЕЛЬ: ВКЛ", free_target: "ЦЕЛЬ: ТОЛЬКО PRO" },
+        ua: { live_feed: "ПРЯМИЙ ЕФІР", calc_title: "ROI КАЛЬКУЛЯТОР", buy: "ЗАКУП", sell: "ПРОДАЖ", profit: "ПРИБУТОК", invest_title: "ІНВЕСТ ПРОГНОЗ", hold_period: "ТЕРМІН (МІСЯЦІ)", ref_title: "РЕФЕРАЛЬНА СИСТЕМА", ref_desc: "Запроси 3 друзів та отримай PRO.", nav_market: "Маркет", nav_tools: "Тулзи", nav_profile: "Профіль", pro_target: "ЦІЛЬ: УВІМК", free_target: "ЦІЛЬ: ТІЛЬКИ PRO" },
+        en: { live_feed: "LIVE MARKET FEED", calc_title: "ROI CALCULATOR", buy: "BUY", sell: "SELL", profit: "PROFIT", invest_title: "INVESTMENT PREDICTION", hold_period: "HOLD PERIOD (MONTHS)", ref_title: "REFERRAL SYSTEM", ref_desc: "Invite 3 friends to get PRO.", nav_market: "Market", nav_tools: "Tools", nav_profile: "Profile", pro_target: "TARGET: ON", free_target: "TARGET: PRO ONLY" }
     };
 
-    let currentLang = localStorage.getItem('ui_lang') || new URLSearchParams(location.search).get('lang') || null;
+    function triggerHaptic(type = 'light') {
+        if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred(type);
+    }
+
+    function toggleOled() {
+        triggerHaptic('medium');
+        document.body.classList.toggle('oled');
+        const color = document.body.classList.contains('oled') ? '#000000' : '#000814';
+        tg.setHeaderColor(color);
+        tg.setBackgroundColor(color);
+    }
+
+    function toggleCurrency() {
+        triggerHaptic();
+        currency = currency === 'USD' ? 'CNY' : 'USD';
+        document.getElementById('currency-toggle').innerText = currency === 'USD' ? '$ USD' : '¥ CNY';
+        updateMarket();
+    }
 
     function applyLang() {
-        const T = translations[currentLang] || translations.en;
-        document.querySelectorAll('[data-t]').forEach(el => {
-            const key = el.getAttribute('data-t');
-            if (T[key]) el.innerText = T[key];
+        const texts = dict[currentLang] || dict.en;
+        document.querySelectorAll('[data-lang]').forEach(el => {
+            const key = el.getAttribute('data-lang');
+            if (texts[key]) el.innerText = texts[key];
         });
     }
 
     function setLang(lang) {
+        triggerHaptic('medium');
         currentLang = lang;
         localStorage.setItem('ui_lang', lang);
-        applyLang(); 
-        
-        const langScreen = document.getElementById('screen-lang');
-        langScreen.style.opacity = '0';
-        
-        setTimeout(() => {
-            langScreen.classList.remove('active');
-            langScreen.style.display = 'none';
-            document.getElementById('main-nav').style.display = 'flex';
-            showScreen('market');
-            startFeeds();
-        }, 400);
+        document.getElementById('screen-lang').classList.remove('active');
+        document.getElementById('main-nav').style.display = 'flex';
+        applyLang();
+        showScreen('market');
+        initProFeatures();
+        startFeeds();
+    }
+
+    function initProFeatures() {
+        if (!isPro) {
+            document.getElementById('invest-block').classList.add('pro-lock');
+            document.getElementById('invest-result').classList.add('pro-blur');
+            document.getElementById('user-status-text').innerText = currentLang === 'ru' ? "БАЗОВЫЙ ДОСТУП" : "FREE SCOUT";
+        } else {
+            document.getElementById('user-status-text').innerText = "PRIME NODE PRO";
+            document.getElementById('user-status-text').style.color = "var(--gold)";
+            document.getElementById('logo-trigger').style.textShadow = "0 0 20px var(--gold)";
+        }
     }
 
     function showScreen(id, el) {
+        triggerHaptic();
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById('screen-' + id).classList.add('active');
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         if(el) el.classList.add('active');
     }
 
-    function initApp() {
-        if (!currentLang) {
-            document.getElementById('screen-lang').classList.add('active');
-        } else {
-            document.getElementById('screen-lang').classList.remove('active');
-            document.getElementById('main-nav').style.display = 'flex';
-            showScreen('market');
-            applyLang();
-            startFeeds();
-        }
-    }
-
-    function startFeeds() {
-        updateMarket();
-        setInterval(updateMarket, 5000);
-        addNews();
-        setInterval(addNews, 10000);
-    }
-
     const skins = [
-        { n: "AK-47 | Nightwish", p: 85.40, g: "+4.2%", vol: 412 },
-        { n: "M4A1-S | Printstream", p: 142.10, g: "+1.8%", vol: 580 },
-        { n: "AWP | Gungnir", p: 12400, g: "+0.4%", vol: 18 },
-        { n: "Glove | Vice", p: 940.00, g: "-1.2%", vol: 84 },
-        { n: "Desert Eagle | Blaze", p: 620.45, g: "+5.1%", vol: 176 }
+        { n: "AK-47 | Slate", p: 4.50, f: "0.0002", r: "rare" },
+        { n: "M4A1-S | Printstream", p: 142.10, f: "0.12", r: "covert" },
+        { n: "AWP | Gungnir", p: 12400.00, f: "0.03", r: "rare" }
     ];
 
     function updateMarket() {
         const list = document.getElementById('market-list');
         if (!list) return;
-        const T = translations[currentLang] || translations.en;
+        const rate = currency === 'CNY' ? 7.2 : 1;
+        const texts = dict[currentLang] || dict.en;
+        
         list.innerHTML = skins.map(s => {
-            const liq = s.vol > 300 ? {t: T.high, c: "#00ffcc"} : s.vol > 50 ? {t: T.stable, c: "#ffa500"} : {t: T.coll, c: "#ff4b2b"};
+            const displayPrice = (s.p * rate).toFixed(2);
+            const floatBadge = isPro ? `<div class="badge">FL: ${s.f}</div>` : '';
+            const targetText = isPro ? texts.pro_target : texts.free_target;
             return `
-                <div class="card">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <b>${s.n}</b>
-                        <span style="font-size:10px; opacity:0.3;">#${Math.floor(Math.random()*999)}</span>
-                    </div>
-                    <div class="price" style="margin: 10px 0;">$${s.p}</div>
-                    <div style="display:flex; justify-content:space-between; font-size:11px;">
-                        <span style="color: ${liq.c}">${liq.t}</span>
-                        <span style="opacity:0.5">${T.lots}: ${s.vol}</span>
-                    </div>
+                <div class="card ${s.r}">
+                    ${floatBadge}
+                    <b style="font-size: 15px;">${s.n}</b>
+                    <div class="price">${currency === 'USD' ? '$' : '¥'}${displayPrice}</div>
+                    <div style="font-size: 9px; opacity: 0.5; margin-top: 5px; font-weight: bold;">${targetText}</div>
                 </div>`;
         }).join('');
     }
@@ -203,36 +235,52 @@
     function calcROI() {
         const buy = parseFloat(document.getElementById('buy-price').value) || 0;
         const sell = parseFloat(document.getElementById('sell-price').value) || 0;
-        const T = translations[currentLang] || translations.en;
         const net = (sell * 0.85) - buy;
         const roi = buy > 0 ? (net / buy * 100).toFixed(1) : 0;
-        const color = net >= 0 ? 'var(--accent)' : 'var(--red)';
-        const resBox = document.getElementById('calc-result');
-        resBox.style.color = color;
-        resBox.style.borderColor = color;
-        resBox.innerHTML = `${T.profit}: $${net.toFixed(2)} (${roi}%)`;
+        const res = document.getElementById('calc-result');
+        const profitText = (dict[currentLang] || dict.en).profit;
+        res.innerHTML = `${profitText}: $${net.toFixed(2)} (${roi}%)`;
+        res.style.color = net >= 0 ? 'var(--accent)' : 'var(--red)';
+        res.style.borderColor = net >= 0 ? 'var(--accent)' : 'var(--red)';
     }
 
-    function addNews() {
-        const list = document.getElementById('news-list');
-        if (!list) return;
-
-        const newsData = {
-            ru: ["Valve обновили политику Buff163", "Крупный закуп скинов M4A1-S", "Операция ожидается в июне", "Цены на кейсы стабильно растут"],
-            ua: ["Valve оновили політику Buff163", "Великий закуп скінів M4A1-S", "Операція очікується в червні", "Ціни на кейси стабільно зростають"],
-            en: ["Valve updated Buff163 policy", "Massive M4A1-S skins buy-out", "New operation expected in June", "Case prices are growing steadily"]
-        };
-
-        const activeLang = localStorage.getItem('ui_lang') || currentLang || 'en';
-        const arr = newsData[activeLang] || newsData.en;
-        const txt = arr[Math.floor(Math.random() * arr.length)];
-        
-        list.insertAdjacentHTML('afterbegin', `<div class="card" style="font-size:13px; border-left: 2px solid var(--blue);">${txt}</div>`);
-        if (list.children.length > 4) list.lastChild.remove();
+    function calcInvest() {
+        if (!isPro) return;
+        triggerHaptic('light');
+        const months = document.getElementById('invest-period').value;
+        const prediction = (Math.random() * 20 + 5).toFixed(1);
+        document.getElementById('invest-result').innerText = `EST. RETURN: +${prediction}% IN ${months}M`;
     }
 
-    // Запуск
-    initApp();
+    function startFeeds() {
+        updateMarket();
+        setInterval(updateMarket, 5000);
+    }
+
+    // ПАСХАЛКА
+    let clicks = 0;
+    document.getElementById('logo-trigger').onclick = () => {
+        clicks++;
+        if(clicks === 5) {
+            document.documentElement.style.setProperty('--blue', 'var(--gold)');
+            tg.showAlert("🔱 GOLDEN TERMINAL ACTIVATED");
+            triggerHaptic('heavy');
+            clicks = 0;
+        }
+    };
+
+    window.onload = () => {
+        if (currentLang) {
+            document.getElementById('screen-lang').classList.remove('active');
+            document.getElementById('main-nav').style.display = 'flex';
+            applyLang();
+            showScreen('market');
+            initProFeatures();
+            startFeeds();
+        } else {
+            document.getElementById('screen-lang').classList.add('active');
+        }
+    };
 </script>
 </body>
 </html>
